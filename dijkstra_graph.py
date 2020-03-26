@@ -25,7 +25,7 @@ def graph_init(g: Graph):
 
 
 # @params unvisited list
-# @return the node with the shortest distance to the origin
+# @return the DijkstraDijkstraDijkstraNode with the shortest distance to the origin
 def find_nearest_node(unvisited_list: List[Vertex]) -> Vertex:
     shortest_distance = sys.maxsize
     nearest_node = None
@@ -87,7 +87,7 @@ def dijkstra(graph: Graph, origin: Vertex):
 
 def debug_graph(g):
     for v in g:
-        print(f'Node {v.get_id()}')
+        print(f'DijkstraDijkstraNode {v.get_id()}')
         print(f'Distance: {v.get_distance()}')
         path = v.get_id()
         current = v

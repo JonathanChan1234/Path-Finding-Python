@@ -1,5 +1,5 @@
 from typing import List, Union
-from Node import Node
+from DijkstraNode import DijkstraNode
 from PriorityQueue import PriorityQueue
 
 ROW = 10
@@ -9,15 +9,15 @@ HORIZONTAL_DISTANCE = 1
 DIAGONAL_DISTANCE = 1.4  # sqrt(2)
 
 
-def debug_grid(grid: List[List[Node]]):
+def debug_grid(grid: List[List[DijkstraNode]]):
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             print(grid[y][x])
 
 
-def debug_shortest_path(grid: List[List[Node]], origin: Node, destination: Node) -> float:
+def debug_shortest_path(grid: List[List[DijkstraNode]], origin: DijkstraNode, destination: DijkstraNode) -> float:
     # find the path first
-    path: List[Node] = []
+    path: List[DijkstraNode] = []
     next_point = destination
     while next_point.get_previous() is not None:
         next_point = next_point.get_previous()
@@ -39,14 +39,14 @@ def debug_shortest_path(grid: List[List[Node]], origin: Node, destination: Node)
     return destination.get_distance()
 
 
-def init_grid(grid: List[List[Node]], row: int, column: int):
+def init_grid(grid: List[List[DijkstraNode]], row: int, column: int):
     for y in range(row):
         grid.append([])
         for x in range(column):
-            grid[y].append(Node(x, y))
+            grid[y].append(DijkstraNode(x, y))
 
 
-def update_node_distance(compared_node: Node, current_node: Node, weight: Union[int, float]):
+def update_node_distance(compared_node: DijkstraNode, current_node: DijkstraNode, weight: Union[int, float]):
     if not compared_node.get_visited():
         new_distance = current_node.get_distance() + weight
         if compared_node.get_distance() > new_distance:
@@ -59,7 +59,7 @@ def update_node_distance(compared_node: Node, current_node: Node, weight: Union[
                   f"(New Distance {new_distance} < Original Distance {compared_node.get_distance()})")
 
 
-def check_destination(destination: Node = None) -> bool:
+def check_destination(destination: DijkstraNode = None) -> bool:
     if destination is None:
         return True
     if destination.get_visited():
@@ -67,14 +67,14 @@ def check_destination(destination: Node = None) -> bool:
     return True
 
 
-def check_out_of_range(x: int, y: int, grid: List[List[Node]]) -> bool:
+def check_out_of_range(x: int, y: int, grid: List[List[DijkstraNode]]) -> bool:
     # Check the node is inside the grid and not an obstacle
     if 0 <= y < len(grid) and 0 <= x < len(grid[y]) and not grid[y][x].is_obstacle():
         return True
     return False
 
 
-def dijkstra(grid: List[List[Node]], origin: Node, destination: Node = None):
+def dijkstra(grid: List[List[DijkstraNode]], origin: DijkstraNode, destination: DijkstraNode = None):
     # set the distance of the origin to 0
     origin.set_distance(0)
 
@@ -95,7 +95,7 @@ def dijkstra(grid: List[List[Node]], origin: Node, destination: Node = None):
         # Set the current node to be "visited"
         current_node.set_visited()
 
-        print(f'Current Node {str(current_node)}:')
+        print(f'Current DijkstraNode {str(current_node)}:')
 
         # Find all the neighbor nodes (vertical, horizontal, diagonal)
         # top
@@ -134,17 +134,17 @@ def dijkstra(grid: List[List[Node]], origin: Node, destination: Node = None):
 
 if __name__ == '__main__':
     # initialize the grid
-    test_grid: List[List[Node]] = []
+    test_grid: List[List[DijkstraNode]] = []
     init_grid(test_grid, ROW, COLUMN)
     debug_grid(test_grid)
     print("-------after path finding--------")
 
     origin = test_grid[0][0]
-    destination = test_grid[9][8]
-    test_grid[0][1].set_obstacle()
+    destination = test_grid[0][9]
+    test_grid[2][2].set_obstacle()
     test_grid[1][0].set_obstacle()
     test_grid[1][1].set_obstacle()
-
+    test_grid[3][3].set_obstacle()
     dijkstra(test_grid, origin, destination)
     debug_grid(test_grid)
     debug_shortest_path(test_grid, origin, destination)

@@ -16,17 +16,14 @@ class Node:
     def add_neighbor(self, neighbor, weight: int = 0) -> None:
         self.adjacent[neighbor] = weight
 
-    def set_distance(self, distance: int):
-        self.distance = distance
-
     def get_distance(self):
-        return self.distance
+        pass
 
-    def set_previous(self, previous: Node):
-        self.previous = previous
+    def set_previous(self, previous):
+        pass
 
-    def get_previous(self) -> Node:
-        return self.previous
+    def get_previous(self):
+        pass
 
     def set_visited(self):
         self.visited = True
