@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import math
 
 from Node import Node
 
@@ -34,3 +35,9 @@ class AStarNode(Node):
 
     def get_distance(self) -> int:
         return self.g + self.h
+
+    def distance_debug(self):
+        if self.g == sys.maxsize /2 and self.h == sys.maxsize /2:
+            return '(inf, inf)'
+        else:
+            return f'({math.floor(self.g), math.floor(self.h)})'

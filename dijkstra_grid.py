@@ -141,10 +141,16 @@ if __name__ == '__main__':
 
     origin = test_grid[0][0]
     destination = test_grid[0][9]
-    test_grid[2][2].set_obstacle()
-    test_grid[1][0].set_obstacle()
+    test_grid[0][1].set_obstacle()
+    test_grid[0][2].set_obstacle()
+    test_grid[0][3].set_obstacle()
+    test_grid[0][4].set_obstacle()
+    test_grid[0][5].set_obstacle()
+    test_grid[0][6].set_obstacle()
     test_grid[1][1].set_obstacle()
-    test_grid[3][3].set_obstacle()
+    test_grid[1][2].set_obstacle()
+    test_grid[1][3].set_obstacle()
+    test_grid[2][2].set_obstacle()
     dijkstra(test_grid, origin, destination)
     debug_grid(test_grid)
     debug_shortest_path(test_grid, origin, destination)

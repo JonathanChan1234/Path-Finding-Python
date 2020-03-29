@@ -125,6 +125,7 @@ def debug_shortest_path(grid: List[List[AStarNode]], origin: AStarNode, destinat
                 print('$', end='')
             else:
                 print('@', end='')
+            print(grid[y][x].distance_debug(), end='')
         print('')
     return destination.get_distance()
 
