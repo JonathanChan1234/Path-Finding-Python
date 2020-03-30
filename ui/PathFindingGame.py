@@ -2,12 +2,13 @@ import sys
 from typing import List
 import pygame
 
-from ui.PathFindingNode import Node
+from ui.UIManager import UIManager
 from ui.PathFindingBoard import Grid
+from ui.UIButton import UIButton
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
-WHITE = (255, 255, 255)
+WHITE = (0, 0, 0)
 FPS = 60
 
 
@@ -21,48 +22,50 @@ class PathFindingGame:
         self.points = 0
         self.fps = fps
         self.clock = pygame.time.Clock()
-        self.hit_text_surface = None
         self.point_font = pygame.font.SysFont(None, 30)
-        self.my_hit_font = pygame.font.SysFont(None, 40)
+
+        # UI Components
         self.grid = grid
-        # check if the initial click
-        self.keydown = False
+        self.manager = UIManager()
+        self.clearAllObstacleButton = UIButton(self.manager, 600, 50, (66, 245, 99), font_size=30,
+                                               text="Clear All Obstacle")
+        self.selectOriginDestinationButton = UIButton(self.manager, 600, 100, (235, 64, 52), font_size=30,
+                                                      text="Select Points")
 
     def refresh(self):
         self.window_surface.fill(self.background)
-        text_surface = self.point_font.render(f'Points: {self.points}', True, (0, 0, 0))
-        self.window_surface.blit(text_surface, (10, 0))
+        text_surface = self.point_font.render(f'Points: {self.points}', True, (255, 255, 255))
+        self.window_surface.blit(text_surface, (10, 10))
         self.grid.render(self.window_surface)
-        if self.keydown:
-            self.grid.handle_hover(pygame.mouse.get_pos())
+        self.manager.render(self.window_surface)
 
-        if self.hit_text_surface:
-            self.window_surface.blit(self.hit_text_surface, (10, 20))
-            self.hit_text_surface = None
         self.clock.tick(self.fps)
         pygame.display.update()
-
-    def gain_point(self):
-        self.points += 5
-        self.hit_text_surface = self.my_hit_font.render('Hit!!', True, (0, 0, 0))
 
     def event_handle(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                # check whether the current clicked node is selected
-                if not self.grid.check_selected_block(pygame.mouse.get_pos()):
-                    self.keydown = True
-                else:
-                    self.grid.deselect_cell(pygame.mouse.get_pos())
-            if event.type == pygame.MOUSEBUTTONUP:
-                self.keydown = False
+            self.grid.event_handler(event)
+            self.manager.event_handler(event)
+            if event.type == self.clearAllObstacleButton.event_id:
+                print(f'Clear All Obstacle')
+                self.grid.clear_all_obstacle()
+            if event.type == self.selectOriginDestinationButton.event_id:
+                print('Select Origin/Destination Point')
+                self.switch_mode()
+
+    def switch_mode(self):
+        self.grid.switch_mode()
+        if self.grid.select_point_mode:
+            pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+        else:
+            pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
 
 if __name__ == '__main__':
-    grid = Grid(10, 10)
+    grid = Grid(20, 20)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, WHITE, grid)
     while True:
         path_finding_game.event_handle()
