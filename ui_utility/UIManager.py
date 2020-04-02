@@ -17,7 +17,6 @@ class UIManager:
         return self.event_id
 
     def add_element(self, element):
-        print(inspect.getmembers(element))
         self.elements.append(element)
 
     def render(self, window_surface):

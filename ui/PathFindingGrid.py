@@ -3,7 +3,6 @@ import sys
 import pygame
 from typing import List, Tuple
 
-from algorithm.AStarNode import AStarNode
 from algorithm.astar_grid import a_star
 from ui.PathFindingNode import PathFindingNode
 
@@ -59,12 +58,12 @@ class PathFindingGrid:
                 func(self.grid[row][column])
 
     def event_handler(self, event):
+        if event.type == PathFindingGrid.PATH_FIND_ID:
+            self.update_grid()
         if self.path_find_animation_started:
             return
-
         if event.type == pygame.MOUSEBUTTONUP:
             self.keydown = False
-
         if event.type == pygame.MOUSEBUTTONDOWN:
             for row in self.grid:
                 for node in row:
@@ -73,9 +72,6 @@ class PathFindingGrid:
                             self.set_marker(node)
                         else:
                             self.set_obstacle(node)
-
-        if event.type == PathFindingGrid.PATH_FIND_ID:
-            self.update_grid()
 
     def set_obstacle(self, node):
         # if the selected node is already an obstacle, deselected the current cell
@@ -109,22 +105,31 @@ class PathFindingGrid:
     def start_path_find(self):
         if len(self.markers) != 2:
             raise Exception("Missing Origin/Destination Point")
-        print('start path finding')
         self.set_animation_started(True)
         origin, destination = self.markers[0], self.markers[1]
-        search_result = a_star(self.grid, origin, destination)
-        self.search_result = search_result
+        self.search_result = a_star(self.grid, origin, destination)
         pygame.time.set_timer(PathFindingGrid.PATH_FIND_ID, 500)
 
     def update_grid(self):
+        # ignore the event counter when the animation is finished
         if len(self.search_result) == 0:
             return
+
+        print('update grid')
+        # draw the immediate result (animation)
         search_result_history = self.search_result.pop(0)
         for row in range(len(search_result_history)):
             for column in range(len(search_result_history[row])):
-                    self.grid[row][column] = search_result_history[row][column]
+                self.grid[row][column] = search_result_history[row][column]
 
-
+        # draw the final path
+        if len(self.search_result) == 0:
+            next_point = self.markers[1]
+            while self.markers[1].get_previous() is not None:
+                next_point.set_path(True)
+                print(next_point.get_coordinate())
+                next_point = next_point.get_previous()
+            self.set_animation_started(False)
 
     def render(self, window_surface):
         self.grid_iterator(lambda node: self.render_node(node, window_surface))
@@ -138,6 +143,6 @@ class PathFindingGrid:
         # 2. The hover position is within a valid node
         # 3. The node is currently NOT marked
         if self.keydown \
-                and node.check_crash(pygame.mouse.get_pos())\
+                and node.check_crash(pygame.mouse.get_pos()) \
                 and not node.is_marked():
             node.set_obstacle(True)

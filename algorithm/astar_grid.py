@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import List, Union
 import timeit
 
+import pygame
+
 from ui.PathFindingNode import PathFindingNode
 from algorithm.PriorityQueue import PriorityQueue
 
@@ -41,8 +43,13 @@ def euclidean_distance(point1, point2):
     return math.sqrt(math.pow(point1.x - point2.x, 2) + math.pow(point1.y - point2.y, 2))
 
 
-def a_star(grid: List[List[PathFindingNode]], origin: PathFindingNode, destination: PathFindingNode) -> \
+def a_star(grid_ref: List[List[PathFindingNode]],
+           origin_ref: PathFindingNode,
+           destination_ref: PathFindingNode) -> \
         List[List[List[PathFindingNode]]]:
+    grid = copy.deepcopy(grid_ref)
+    origin = grid[origin_ref.y][origin_ref.x]
+    destination = grid[destination_ref.y][destination_ref.x]
     origin.set_g(0)
     origin.set_h(0)
 
@@ -50,6 +57,7 @@ def a_star(grid: List[List[PathFindingNode]], origin: PathFindingNode, destinati
     unvisited_list = PriorityQueue()
     for y in range(len(grid)):
         for x in range(len(grid[y])):
+            print(type(grid[y][x]))
             unvisited_list.insert(grid[y][x])
 
     neighbors = [
