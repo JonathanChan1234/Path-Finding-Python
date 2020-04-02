@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import math
 
-from Node import Node
+from algorithm.Node import Node
 
 
 class AStarNode(Node):
@@ -41,3 +41,20 @@ class AStarNode(Node):
             return '(inf, inf)'
         else:
             return f'({math.floor(self.g), math.floor(self.h)})'
+
+    def status(self):
+        return {
+            'g': self.g,
+            'h': self.h,
+            'visited': self.visited
+        }
+
+    def __deepcopy__(self, memodict={}):
+        copy_node = AStarNode(self.x, self.y)
+        copy_node.g = self.g
+        copy_node.h = self.h
+        copy_node.obstacle = self.obstacle
+        copy_node.visited = self.visited
+        copy_node.previous = self.previous
+        copy_node.obstacle = self.obstacle
+        return copy_node

@@ -1,9 +1,8 @@
 import math
 from typing import List, Union
 
-from Node import Node
-from AStarNode import AStarNode
-from PriorityQueue import PriorityQueue
+from algorithm.AStarNode import AStarNode
+from algorithm.PriorityQueue import PriorityQueue
 
 ROW = 10
 COLUMN = 10

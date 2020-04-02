@@ -1,8 +1,8 @@
 import pygame
-from typing import Tuple, Callable
+from typing import Tuple
 
-from ui.UIComponent import UIComponent
-from ui.UIManager import UIManager
+from ui_utility.UIComponent import UIComponent
+from ui_utility.UIManager import UIManager
 
 PADDING = 10
 
@@ -16,6 +16,7 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
                  width: int = None,
                  height: int = None,
                  text='Test Button',
+                 disable=False,
                  font_size=15,
                  padding=PADDING):
         super().__init__()
@@ -39,15 +40,27 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
         self.button.fill(color)
         self.button_rect = self.button.get_rect()
         self.button_rect.topleft = (x_pos, y_pos)
+        self.disable = disable
 
         # add element to the ui manager
         manager.add_element(self)
-        self.event_id = manager.assign_id()
+        self.component_id = manager.assign_id()
+
+    def set_disabled(self):
+        self.disable = True
+        self.button.set_alpha(100)
+
+    def set_enabled(self):
+        self.disable = False
+        self.button.set_alpha(255)
 
     def event_handler(self, event):
+        # Ignore all the action when disabled
+        if self.disable:
+            return
         if event.type == pygame.MOUSEBUTTONDOWN and \
                 self.button_rect.collidepoint(pygame.mouse.get_pos()):
-            pygame.event.post(pygame.event.Event(self.event_id, {'name': 'test button'}))
+            pygame.event.post(pygame.event.Event(UIManager.BUTTON_EVENT_ID, {'component_id': self.component_id}))
 
     def render(self, window_surface: pygame.SurfaceType):
         window_surface.blit(self.button, self.button_rect)

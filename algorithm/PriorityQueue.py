@@ -1,6 +1,6 @@
 import sys
 from typing import List, Tuple
-from Node import Node
+from algorithm.Node import Node
 
 
 # Priority Queue Implementation using the list data structure

@@ -15,7 +15,7 @@ FPS = 60
 class Mosquito(pygame.sprite.Sprite):
     def __init__(self, width, height, window_width, window_height):
         super().__init__()
-        self.raw_image = pygame.image.load(os.path.join(os.getcwd(), 'ui/mosquito.png'))
+        self.raw_image = pygame.image.load(os.path.join(os.getcwd(), '../asset/mosquito.png'))
         self.image = pygame.transform.scale(self.raw_image, (width, height))
         self.width = width
         self.height = height

@@ -31,8 +31,8 @@ class Node:
     def get_visited(self):
         return self.visited
 
-    def set_obstacle(self):
-        self.obstacle = True
+    def set_obstacle(self, obstacle: bool = True):
+        self.obstacle = obstacle
 
     def is_obstacle(self):
         return self.obstacle

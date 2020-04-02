@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from Node import Node
+from algorithm.Node import Node
 
 
 class DijkstraNode(Node):
