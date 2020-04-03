@@ -44,9 +44,12 @@ class AStarNode(Node):
         else:
             return f'({math.floor(self.g), math.floor(self.h)})'
 
-    def status(self):
-        return {
-            'g': self.g,
-            'h': self.h,
-            'visited': self.visited
-        }
+    def __deepcopy__(self, memodict={}):
+        copyNode = AStarNode(self.x, self.y)
+        if self.get_visited():
+            copyNode.set_visited()
+        copyNode.set_obstacle(self.obstacle)
+        copyNode.set_previous(self.previous)
+        copyNode.set_g(self.g)
+        copyNode.set_h(self.h)
+        return copyNode

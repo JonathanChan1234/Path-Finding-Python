@@ -1,12 +1,10 @@
 import copy
 import math
+import timeit
 from datetime import datetime
 from typing import List, Union
-import timeit
 
-import pygame
-
-from ui.PathFindingNode import PathFindingNode
+from algorithm.AStarNode import AStarNode
 from algorithm.PriorityQueue import PriorityQueue
 
 VERTICAL_DISTANCE = 1
@@ -15,13 +13,13 @@ DIAGONAL_DISTANCE = 1.4  # sqrt(2)
 
 
 # check whether it is the valid block (inside the grid and not an obstacle)
-def check_valid_block(x: int, y: int, grid: List[List[PathFindingNode]]):
+def check_valid_block(x: int, y: int, grid: List[List[AStarNode]]):
     if 0 <= y < len(grid) and 0 <= x < len(grid[y]) and not grid[y][x].is_obstacle():
         return True
     return False
 
 
-def update_node_distance(compared_node: PathFindingNode, current_node: PathFindingNode, destination: PathFindingNode,
+def update_node_distance(compared_node: AStarNode, current_node: AStarNode, destination: AStarNode,
                          weight: Union[int, float]):
     if compared_node.get_visited():
         return
@@ -43,10 +41,9 @@ def euclidean_distance(point1, point2):
     return math.sqrt(math.pow(point1.x - point2.x, 2) + math.pow(point1.y - point2.y, 2))
 
 
-def a_star(grid_ref: List[List[PathFindingNode]],
-           origin_ref: PathFindingNode,
-           destination_ref: PathFindingNode) -> \
-        List[List[List[PathFindingNode]]]:
+def a_star(grid_ref: List[List[AStarNode]],
+           origin_ref: AStarNode,
+           destination_ref: AStarNode):
     grid = copy.deepcopy(grid_ref)
     origin = grid[origin_ref.y][origin_ref.x]
     destination = grid[destination_ref.y][destination_ref.x]
@@ -57,7 +54,6 @@ def a_star(grid_ref: List[List[PathFindingNode]],
     unvisited_list = PriorityQueue()
     for y in range(len(grid)):
         for x in range(len(grid[y])):
-            print(type(grid[y][x]))
             unvisited_list.insert(grid[y][x])
 
     neighbors = [
@@ -70,14 +66,14 @@ def a_star(grid_ref: List[List[PathFindingNode]],
         {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, 1]},
         {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, 1]}
     ]
-    search_result: List[List[List[PathFindingNode]]] = []
+    search_result: List[List[List[AStarNode]]] = []
 
     # if unvisited list is not empty and the destination node is not visited yet
     while not unvisited_list.is_empty() and not destination.get_visited():
         # the first current node should be the origin
         x, y = unvisited_list.pop()
         current_node = grid[y][x]
-        print(f'Current PathFindingNode {str(current_node)}:')
+        print(f'Current AStarNode {str(current_node)}:')
         for neighbor in neighbors:
             neighbor_x = current_node.x + neighbor['coordinate'][0]
             neighbor_y = current_node.y + neighbor['coordinate'][1]
@@ -95,19 +91,11 @@ def astar_test() -> float:
     # initialize the test grid
     ROW = 20
     COLUMN = 20
-    grid: List[List[PathFindingNode]] = []
+    grid: List[List[AStarNode]] = []
     for y in range(ROW):
         grid.append([])
         for x in range(COLUMN):
-            node = PathFindingNode(20,
-                                   20,
-                                   (50, 129, 168),
-                                   2,
-                                   (0, 0, 0),
-                                   x * 20 + 50 + 5,
-                                   y * 20 + 50 + 5,
-                                   x,
-                                   y)
+            node = AStarNode(x, y)
             grid[y].append(node)
 
     for row in range(ROW):
@@ -117,10 +105,9 @@ def astar_test() -> float:
     origin = grid[0][0]
     destination = grid[9][8]
     search_result = a_star(grid, origin, destination)
-    print(len(search_result))
 
     # find the path first
-    path: List[PathFindingNode] = []
+    path: List[AStarNode] = []
     next_point = destination
     while next_point.get_previous() is not None:
         next_point = next_point.get_previous()
@@ -144,8 +131,8 @@ def astar_test() -> float:
 
 
 if __name__ == '__main__':
-    # print(timeit.timeit(lambda: astar_test(), number=10))
-    print(astar_test())
+    print(timeit.timeit(lambda: astar_test(), number=10))
+    # print(astar_test())
     after = datetime.now()
     # copy result: 2.1418863999999997
     # deep copy (override __deepcopy__) result: 105.8156528/19.521769799999998

@@ -107,8 +107,9 @@ class PathFindingGrid:
             raise Exception("Missing Origin/Destination Point")
         self.set_animation_started(True)
         origin, destination = self.markers[0], self.markers[1]
+        pygame.time.delay(2000)
         self.search_result = a_star(self.grid, origin, destination)
-        pygame.time.set_timer(PathFindingGrid.PATH_FIND_ID, 500)
+        pygame.time.set_timer(PathFindingGrid.PATH_FIND_ID, 10)
 
     def update_grid(self):
         # ignore the event counter when the animation is finished
@@ -120,14 +121,18 @@ class PathFindingGrid:
         search_result_history = self.search_result.pop(0)
         for row in range(len(search_result_history)):
             for column in range(len(search_result_history[row])):
-                self.grid[row][column] = search_result_history[row][column]
+                self.grid[row][column].set_g(search_result_history[row][column].get_g())
+                self.grid[row][column].set_h(search_result_history[row][column].get_h())
+                if search_result_history[row][column].get_previous():
+                    previous_node = search_result_history[row][column].get_previous()
+                    print(previous_node.get_coordinate())
+                    self.grid[row][column].set_previous(self.grid[previous_node.y][previous_node.x])
 
         # draw the final path
         if len(self.search_result) == 0:
             next_point = self.markers[1]
-            while self.markers[1].get_previous() is not None:
+            while next_point.get_previous() is not None:
                 next_point.set_path(True)
-                print(next_point.get_coordinate())
                 next_point = next_point.get_previous()
             self.set_animation_started(False)
 

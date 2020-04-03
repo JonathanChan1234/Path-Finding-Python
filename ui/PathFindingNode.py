@@ -1,6 +1,7 @@
 import math
 import os
 import sys
+from enum import Enum
 
 import pygame
 from typing import Tuple
@@ -10,6 +11,12 @@ from algorithm.AStarNode import AStarNode
 SELECTED_COLOR = (255, 255, 0)
 VISITED_COLOR = (255, 0, 0)
 PATH_COLOR = (0, 0, 255)
+
+
+class PathFindingNodeState(Enum):
+    obstacle = 1
+    marked = 2
+    path = 3
 
 
 class PathFindingNode(pygame.sprite.Sprite, AStarNode):
@@ -104,15 +111,3 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
         window_surface.blit(self.block, self.block_rect)
         if self.marked:
             window_surface.blit(self.marker, self.marker_rect)
-
-    def __deepcopy__(self, memodict={}):
-        copy_node = PathFindingNode(self.width, self.height, self.color, self.border_width, self.border_color,
-                                    self.x_pos, self.y_pos, self.x, self.y)
-        copy_node.g = self.g
-        copy_node.h = self.h
-        copy_node.obstacle = self.obstacle
-        copy_node.visited = self.visited
-        copy_node.previous = self.previous
-        copy_node.marked = self.marked
-        copy_node.searched = self.searched
-        return copy_node
