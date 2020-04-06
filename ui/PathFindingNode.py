@@ -8,24 +8,27 @@ from typing import Tuple
 
 from algorithm.AStarNode import AStarNode
 
-SELECTED_COLOR = (255, 255, 0)
+UNVISITED_COLOR = (50, 129, 168)
+OBSTACLE_COLOR = (255, 255, 0)
 VISITED_COLOR = (255, 0, 0)
+SEARCHED_COLOR = (168, 50, 143)
 PATH_COLOR = (0, 0, 255)
+BORDER_COLOR = (0, 0, 0)
 
 
 class PathFindingNodeState(Enum):
-    obstacle = 1
-    marked = 2
-    path = 3
+    UNVISITED = 1
+    SEARCHED = 2
+    OBSTACLE = 3
+    VISITED = 4  # shortest path to this node is found
+    PATH = 5
 
 
 class PathFindingNode(pygame.sprite.Sprite, AStarNode):
     def __init__(self,
                  width: int,
                  height: int,
-                 color: Tuple[int, int, int],
                  border_width: int,
-                 border_color: Tuple[int, int, int],
                  x_pos: int,
                  y_pos: int,
                  x: int,
@@ -42,17 +45,16 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
 
         # node border properties
         self.border_width = border_width
-        self.border_color = border_color
 
         # node block
         self.block = pygame.Surface([self.width, self.height])
-        self.block.fill(color)
+        self.block.fill(UNVISITED_COLOR)
         self.block_rect = self.block.get_rect()
         self.block_rect.topleft = (x_pos + self.border_width, y_pos + self.border_width)
 
         # node block border
         self.border = pygame.Surface([self.width + self.border_width * 2, self.height + self.border_width * 2])
-        self.border.fill(border_color)
+        self.border.fill(BORDER_COLOR)
         self.border_rect = self.border.get_rect()
         self.border_rect.topleft = (x_pos, y_pos)
 
@@ -61,10 +63,8 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
         self.y = y
 
         # other properties
-        self.color = color
         self.marked = False
-        self.searched = False
-        self.is_path = False
+        self.state: PathFindingNodeState = PathFindingNodeState.UNVISITED
 
         # marker
         # set marker to the middle of the node block
@@ -82,31 +82,42 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
     def is_marked(self) -> bool:
         return self.marked
 
-    def set_searched(self, searched: bool):
-        self.searched = searched
-
-    def is_searched(self) -> bool:
-        return self.searched
-
-    def set_path(self, path: bool):
-        self.is_path = path
-
-    def get_path(self) -> bool:
-        return self.is_path
+    def set_path(self):
+        self.state = PathFindingNodeState.PATH
 
     def check_crash(self, pos: Tuple[int, int]):
         return self.block_rect.collidepoint(pos)
 
-    def render(self, window_surface: pygame.SurfaceType):
-        if self.obstacle:
-            self.block.fill(SELECTED_COLOR)
-        elif self.get_distance() != sys.maxsize:
-            self.block.fill(VISITED_COLOR)
-        else:
-            self.block.fill(self.color)
+    def set_g(self, g):
+        AStarNode.set_g(self, g)
+        if self.get_distance() != sys.maxsize:
+            self.state = PathFindingNodeState.SEARCHED
 
-        if self.get_path():
+    def set_h(self, h):
+        AStarNode.set_h(self, h)
+        if self.get_distance() != sys.maxsize:
+            self.state = PathFindingNodeState.SEARCHED
+
+    def set_visited(self):
+        AStarNode.set_visited(self)
+        self.state = PathFindingNodeState.VISITED
+
+    def set_obstacle(self, obstacle: bool = True):
+        AStarNode.set_obstacle(self, obstacle)
+        self.state = PathFindingNodeState.OBSTACLE if obstacle else PathFindingNodeState.UNVISITED
+
+    def render(self, window_surface: pygame.SurfaceType):
+        if self.state == PathFindingNodeState.UNVISITED:
+            self.block.fill(UNVISITED_COLOR)
+        elif self.state == PathFindingNodeState.OBSTACLE:
+            self.block.fill(OBSTACLE_COLOR)
+        elif self.state == PathFindingNodeState.VISITED:
+            self.block.fill(VISITED_COLOR)
+        elif self.state == PathFindingNodeState.SEARCHED:
+            self.block.fill(SEARCHED_COLOR)
+        elif self.state == PathFindingNodeState.PATH:
             self.block.fill(PATH_COLOR)
+
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
         if self.marked:

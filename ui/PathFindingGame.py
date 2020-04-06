@@ -1,4 +1,3 @@
-import inspect
 from typing import Tuple
 
 import pygame
@@ -39,17 +38,40 @@ class PathFindingGame:
                                         text="Select Points")
         self.startPathFindButton = UIButton(self.manager, 600, 150, (235, 225, 52), font_size=30,
                                             text="Path Finding")
-        self.disableTestButton = UIButton(self.manager, 600, 200, (235, 64, 52), font_size=30,
-                                          text="Disable All")
-        self.enableTestButton = UIButton(self.manager, 600, 250, (235, 64, 52), font_size=30,
-                                         text="Enable All")
-        self.messageText = UIText(self.manager, 600, 300, (201, 24, 4), font_size=20,
+        self.resetGridButton = UIButton(self.manager, 600, 200, (50, 72, 168), font_size=30, text="Reset All")
+
+        self.messageText = UIText(self.manager, 600, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)
 
     def refresh(self):
+        # Switch cursor in different mode
+        if self.grid.select_marker:
+            pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+        else:
+            pygame.mouse.set_cursor(*pygame.cursors.arrow)
+
+        # update the game background
         self.window_surface.fill(self.background)
+        # render grid and other ui components
         self.grid.render(self.window_surface)
         self.manager.render(self.window_surface)
+
+        # disable the path find button if the makers are not set
+        if not self.grid.is_marker_set():
+            self.startPathFindButton.set_disabled()
+        else:
+            self.startPathFindButton.set_enabled()
+
+        # disable the clear obstacle and set maker button when the animation started
+        if self.grid.animation_started:
+            self.clearAllObstacleButton.set_disabled()
+            self.setMarkerButton.set_disabled()
+            self.resetGridButton.set_disabled()
+        else:
+            self.clearAllObstacleButton.set_enabled()
+            self.setMarkerButton.set_enabled()
+            self.resetGridButton.set_enabled()
+
         self.clock.tick(self.fps)
         pygame.display.update()
 
@@ -64,30 +86,21 @@ class PathFindingGame:
                     self.grid.clear_all_obstacle()
                 if event.component_id == self.setMarkerButton.component_id:
                     self.switch_mode()
-                if event.component_id == self.disableTestButton.component_id:
-                    self.clearAllObstacleButton.set_disabled()
-                    self.setMarkerButton.set_disabled()
-                if event.component_id == self.enableTestButton.component_id:
-                    self.clearAllObstacleButton.set_enabled()
-                    self.setMarkerButton.set_enabled()
                 if event.component_id == self.startPathFindButton.component_id:
                     if not self.grid.is_marker_set():
                         self.messageText.set_text("Please select two points")
                     else:
                         self.grid.start_path_find()
+                if event.component_id == self.resetGridButton.component_id:
+                    self.grid.reset_grid()
 
     def switch_mode(self):
         self.grid.switch_mode()
-        if self.grid.select_point_mode:
-            pygame.mouse.set_cursor(*pygame.cursors.broken_x)
-        else:
-            pygame.mouse.set_cursor(*pygame.cursors.arrow)
+
 
 
 if __name__ == '__main__':
     grid = PathFindingGrid(20, 20)
-    print(inspect.getmembers(grid))
-
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, WHITE, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()

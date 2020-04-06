@@ -1,5 +1,6 @@
 import copy
 import math
+import sys
 import timeit
 from datetime import datetime
 from typing import List, Union
@@ -30,11 +31,6 @@ def update_node_distance(compared_node: AStarNode, current_node: AStarNode, dest
         compared_node.set_previous(current_node)
         compared_node.set_g(new_g)
         compared_node.set_h(new_h)
-        print(f"Updated for the vertex {str(compared_node)}"
-              f"(New Distance {new_distance} > Original Distance {compared_node.get_distance()})")
-    else:
-        print(f"Updated for the vertex {str(compared_node)}"
-              f"(New Distance {new_distance} < Original Distance {compared_node.get_distance()})")
 
 
 def euclidean_distance(point1, point2):
@@ -54,7 +50,8 @@ def a_star(grid_ref: List[List[AStarNode]],
     unvisited_list = PriorityQueue()
     for y in range(len(grid)):
         for x in range(len(grid[y])):
-            unvisited_list.insert(grid[y][x])
+            if check_valid_block(x, y, grid):
+                unvisited_list.insert(grid[y][x])
 
     neighbors = [
         {'distance': VERTICAL_DISTANCE, 'coordinate': [0, -1]},
@@ -70,6 +67,7 @@ def a_star(grid_ref: List[List[AStarNode]],
 
     # if unvisited list is not empty and the destination node is not visited yet
     while not unvisited_list.is_empty() and not destination.get_visited():
+        debug_unvisited_list(unvisited_list)
         # the first current node should be the origin
         x, y = unvisited_list.pop()
         current_node = grid[y][x]
@@ -84,13 +82,20 @@ def a_star(grid_ref: List[List[AStarNode]],
                                      neighbor['distance'])
         search_result.append(copy.deepcopy(grid))
         current_node.set_visited()
-    return search_result
+    path_found = destination.get_visited()
+    return path_found, search_result
+
+
+def debug_unvisited_list(unvisited_list: PriorityQueue):
+    for node in unvisited_list:
+        if node.get_distance() != sys.maxsize:
+            print(f'{node.get_coordinate()}, f = {node.get_distance()}')
 
 
 def astar_test() -> float:
     # initialize the test grid
-    ROW = 20
-    COLUMN = 20
+    ROW = 6
+    COLUMN = 11
     grid: List[List[AStarNode]] = []
     for y in range(ROW):
         grid.append([])
@@ -98,42 +103,49 @@ def astar_test() -> float:
             node = AStarNode(x, y)
             grid[y].append(node)
 
-    for row in range(ROW):
-        grid[row][row].set_obstacle()
+    grid[1][3].set_obstacle(True)
+    grid[2][3].set_obstacle(True)
+    grid[2][4].set_obstacle(True)
+    grid[2][5].set_obstacle(True)
+    grid[2][6].set_obstacle(True)
+    grid[2][7].set_obstacle(True)
+
 
     # astar
-    origin = grid[0][0]
-    destination = grid[9][8]
-    search_result = a_star(grid, origin, destination)
+    destination = grid[1][4]
+    origin = grid[4][7]
+    success, search_result = a_star(grid, origin, destination)
+    print(f"Path Finding Success: {success}")
 
+    final_result = search_result[len(search_result) - 1]
     # find the path first
     path: List[AStarNode] = []
-    next_point = destination
+    next_point = final_result[1][4]
     while next_point.get_previous() is not None:
         next_point = next_point.get_previous()
         path.append(next_point)
 
-    for y in range(len(grid)):
-        for x in range(len(grid[y])):
-            if origin == grid[y][x]:
+    for row in final_result:
+        for node in row:
+            if origin == node:
                 print("o", end='')
-            elif destination == grid[y][x]:
+            elif destination == node:
                 print("x", end='')
-            elif grid[y][x] in path:
-                print(' ', end='')
-            elif grid[y][x].is_obstacle():
+            elif node in path:
+                print('<>', end='')
+            elif node.is_obstacle():
                 print('$', end='')
             else:
                 print('@', end='')
-            # print(grid[y][x].distance_debug(), end='')
+            print(node.distance_debug(), end='')
         print('')
     return destination.get_distance()
 
 
 if __name__ == '__main__':
-    print(timeit.timeit(lambda: astar_test(), number=10))
-    # print(astar_test())
-    after = datetime.now()
+    # print(timeit.timeit(lambda: astar_test(), number=10))
+    print(astar_test())
+    # after = datetime.now()
     # copy result: 2.1418863999999997
     # deep copy (override __deepcopy__) result: 105.8156528/19.521769799999998
     # deep copy (do not override) result: 413.8303631/68.8988473

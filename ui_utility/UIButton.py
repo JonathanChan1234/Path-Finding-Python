@@ -48,11 +48,9 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
 
     def set_disabled(self):
         self.disable = True
-        self.button.set_alpha(100)
 
     def set_enabled(self):
         self.disable = False
-        self.button.set_alpha(255)
 
     def event_handler(self, event):
         # Ignore all the action when disabled
@@ -67,4 +65,8 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
         text_width, text_height = self.text.get_size()
         x_offset = (self.width - text_width) / 2
         y_offset = (self.height - text_height) / 2
+        if self.disable:
+            self.button.set_alpha(100)
+        else:
+            self.button.set_alpha(255)
         window_surface.blit(self.text, (x_offset + self.x_pos, y_offset + self.y_pos))

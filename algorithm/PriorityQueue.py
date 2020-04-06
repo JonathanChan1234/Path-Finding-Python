@@ -3,6 +3,19 @@ from typing import List, Tuple
 from algorithm.Node import Node
 
 
+class PriorityQueueIterator:
+    def __init__(self, queue):
+        self._queue = queue
+        self._index = 0
+
+    def __next__(self):
+        if self._index < len(self._queue.queue):
+            node = self._queue.queue[self._index]
+            self._index += 1
+            return node
+        raise StopIteration
+
+
 # Priority Queue Implementation using the list data structure
 class PriorityQueue(object):
     def __init__(self):
@@ -32,3 +45,6 @@ class PriorityQueue(object):
         except IndexError:
             print("Index Error")
             exit()
+
+    def __iter__(self):
+        return PriorityQueueIterator(self)
