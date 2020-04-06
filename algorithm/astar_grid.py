@@ -68,9 +68,9 @@ def a_star(grid_ref: List[List[AStarNode]],
     # if unvisited list is not empty and the destination node is not visited yet
     while not unvisited_list.is_empty() and not destination.get_visited():
         debug_unvisited_list(unvisited_list)
-        # the first current node should be the origin
         x, y = unvisited_list.pop()
         current_node = grid[y][x]
+        current_node.set_visited()
         print(f'Current AStarNode {str(current_node)}:')
         for neighbor in neighbors:
             neighbor_x = current_node.x + neighbor['coordinate'][0]
@@ -81,7 +81,7 @@ def a_star(grid_ref: List[List[AStarNode]],
                                      destination,
                                      neighbor['distance'])
         search_result.append(copy.deepcopy(grid))
-        current_node.set_visited()
+
     path_found = destination.get_visited()
     return path_found, search_result
 

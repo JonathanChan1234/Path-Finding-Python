@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pygame
 
+from ui_utility.UIDialog import UIDialog
 from ui_utility.UIManager import UIManager
 from ui.PathFindingGrid import PathFindingGrid
 from ui_utility.UIButton import UIButton
@@ -42,6 +43,7 @@ class PathFindingGame:
 
         self.messageText = UIText(self.manager, 600, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)
+        self.dialog = UIDialog(self.manager, 300, 300, (255, 255, 255))
 
     def refresh(self):
         # Switch cursor in different mode
@@ -63,21 +65,28 @@ class PathFindingGame:
             self.startPathFindButton.set_enabled()
 
         # disable the clear obstacle and set maker button when the animation started
-        if self.grid.animation_started:
+        if self.grid.is_disabled():
             self.clearAllObstacleButton.set_disabled()
             self.setMarkerButton.set_disabled()
-            self.resetGridButton.set_disabled()
+            self.startPathFindButton.set_disabled()
         else:
             self.clearAllObstacleButton.set_enabled()
             self.setMarkerButton.set_enabled()
+            self.startPathFindButton.set_enabled()
+
+        # only enable the reset button when path finding is finished
+        if self.grid.is_path_find_finished():
             self.resetGridButton.set_enabled()
+        else:
+            self.resetGridButton.set_disabled()
 
         self.clock.tick(self.fps)
         pygame.display.update()
 
     def event_handle(self):
         for event in pygame.event.get():
-            self.grid.event_handler(event)
+            if not self.dialog.is_show():
+                self.grid.event_handler(event)
             self.manager.event_handler(event)
             if event.type == pygame.QUIT:
                 self.running = False
@@ -93,10 +102,13 @@ class PathFindingGame:
                         self.grid.start_path_find()
                 if event.component_id == self.resetGridButton.component_id:
                     self.grid.reset_grid()
+                if event.component_id == self.dialog.component_id:
+                    print(event)
+                    if event.event == UIDialog.CLOSE_BUTTON_CLICKED:
+                        self.dialog.dismiss()
 
     def switch_mode(self):
         self.grid.switch_mode()
-
 
 
 if __name__ == '__main__':

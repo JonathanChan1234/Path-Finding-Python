@@ -100,7 +100,8 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
 
     def set_visited(self):
         AStarNode.set_visited(self)
-        self.state = PathFindingNodeState.VISITED
+        if self.get_visited():
+            self.state = PathFindingNodeState.VISITED
 
     def set_obstacle(self, obstacle: bool = True):
         AStarNode.set_obstacle(self, obstacle)

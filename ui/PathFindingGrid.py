@@ -35,7 +35,8 @@ class PathFindingGrid:
         # True when the player is currently in selecting the origin/destination
         self.select_marker = False
         # The Path Finding is currently in progress
-        self.animation_started = False
+        self.disabled = False
+        self.path_find_finished = False
         self.markers: List[PathFindingNode] = []
         self.search_result: List[List[List[PathFindingNode]]] = []
 
@@ -95,15 +96,23 @@ class PathFindingGrid:
     def switch_mode(self):
         self.select_marker = not self.select_marker
 
-    def set_animation_started(self, started: bool):
-        self.animation_started = started
+    def set_disabled(self, disabled: bool):
+        self.disabled = disabled
+
+    def is_disabled(self):
+        return self.disabled
+
+    def set_path_find_finished(self, finished: bool):
+        self.path_find_finished = finished
+
+    def is_path_find_finished(self):
+        return self.path_find_finished
 
     def start_path_find(self):
         if len(self.markers) != 2:
             raise Exception("Missing Origin/Destination Point")
-        self.set_animation_started(True)
+        self.set_disabled(True)
         origin, destination = self.markers[0], self.markers[1]
-        pygame.time.delay(2000)
         path_found, self.search_result = a_star(self.grid, origin, destination)
         pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 50)
 
@@ -122,7 +131,7 @@ class PathFindingGrid:
             while next_point.get_previous() is not None:
                 next_point.set_path()
                 next_point = next_point.get_previous()
-            self.set_animation_started(False)
+            self.set_path_find_finished(True)
 
     def copy_grid(self, copy_grid: List[List[AStarNode]]):
         for row in range(len(copy_grid)):
@@ -137,17 +146,19 @@ class PathFindingGrid:
 
     def reset_grid(self):
         self.init_grid()
+        self.set_disabled(False)
+        self.set_path_find_finished(False)
         self.markers.clear()
         self.search_result.clear()
         pass
 
     def event_handler(self, event):
         if event.type == PathFindingGrid.PATH_ANIMATION_ID and \
-                self.animation_started:
+                self.disabled:
             self.update_grid()
-        if event.type == pygame.MOUSEBUTTONUP and not self.animation_started:
+        if event.type == pygame.MOUSEBUTTONUP and not self.disabled:
             self.select_obstacle = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not self.disabled:
             for row in self.grid:
                 for node in row:
                     if node.check_crash(pygame.mouse.get_pos()):
@@ -161,7 +172,7 @@ class PathFindingGrid:
 
     def render_node(self, node, window_surface):
         node.render(window_surface)
-        if self.animation_started:
+        if self.disabled:
             return
         
         # Set the node that the player currently hover when these 3 conditions is fulfilled
