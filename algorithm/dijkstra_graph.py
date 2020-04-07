@@ -1,7 +1,7 @@
 import sys
 from typing import List
-from Vertex import Vertex
-from Graph import Graph
+from algorithm.Vertex import Vertex
+from algorithm.Graph import Graph
 
 
 def graph_init(g: Graph):

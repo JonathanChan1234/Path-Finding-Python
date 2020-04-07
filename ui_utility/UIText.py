@@ -1,4 +1,5 @@
 import pygame
+from pygame.sprite import Sprite
 from pygame.font import SysFont
 from typing import Tuple
 
@@ -9,7 +10,7 @@ FONT_SIZE = 20
 LINE_SPACING = 5
 
 
-class UIText(pygame.sprite.Sprite, UIComponent):
+class UIText(Sprite, UIComponent):
     def __init__(self,
                  manager: UIManager,
                  x_pos: int,
@@ -20,7 +21,8 @@ class UIText(pygame.sprite.Sprite, UIComponent):
                  line_spacing: int = LINE_SPACING,
                  font_size=FONT_SIZE,
                  font=None):
-        super().__init__()
+        Sprite.__init__(self)
+        UIComponent.__init__(self, manager)
         self.color = color
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -31,10 +33,6 @@ class UIText(pygame.sprite.Sprite, UIComponent):
         self.width = width
         self.text = text
         self.color = color
-
-        # add element to the ui manager
-        manager.add_element(self)
-        self.event_id = manager.assign_id()
 
     def init_text_ui(self):
         # ui button surface

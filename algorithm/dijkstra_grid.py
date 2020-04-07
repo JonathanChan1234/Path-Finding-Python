@@ -1,5 +1,5 @@
 from typing import List, Union
-from DijkstraNode import DijkstraNode
+from algorithm.DijkstraNode import DijkstraNode
 from algorithm.PriorityQueue import PriorityQueue
 
 ROW = 10

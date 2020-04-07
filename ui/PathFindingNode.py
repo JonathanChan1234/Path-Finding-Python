@@ -13,6 +13,7 @@ OBSTACLE_COLOR = (255, 255, 0)
 VISITED_COLOR = (255, 0, 0)
 SEARCHED_COLOR = (168, 50, 143)
 PATH_COLOR = (0, 0, 255)
+MARKER_COLOR = (245, 120, 66)
 BORDER_COLOR = (0, 0, 0)
 
 
@@ -118,8 +119,34 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
             self.block.fill(SEARCHED_COLOR)
         elif self.state == PathFindingNodeState.PATH:
             self.block.fill(PATH_COLOR)
-
+        if self.marked:
+            self.block.fill(MARKER_COLOR)
+            # window_surface.blit(self.marker, self.marker_rect)
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
-        if self.marked:
-            window_surface.blit(self.marker, self.marker_rect)
+
+        distance = 'inf' if self.get_distance() == sys.maxsize else str(round(self.get_distance(), 1))
+        g_distance = 'inf' if self.get_g() == sys.maxsize / 2 else str(round(self.get_g(), 1))
+        h_distance = 'inf' if self.get_h() == sys.maxsize / 2 else str(round(self.get_h(), 1))
+
+        top = self.border_rect.top
+        left = self.border_rect.left
+        right = self.border_rect.right
+        bottom = self.border_rect.bottom
+        centerx = self.border_rect.centerx
+
+        if g_distance != 'inf':
+            g_distance_text = pygame.font.SysFont(None, 16).render(g_distance, True, (255, 255, 255))
+            window_surface.blit(g_distance_text,
+                                (left + 5, top + 5))
+        if h_distance != 'inf':
+            h_distance_text = pygame.font.SysFont(None, 16).render(h_distance, True, (0, 0, 0))
+            h_distance_width = h_distance_text.get_width()
+            window_surface.blit(h_distance_text,
+                                (right - h_distance_width - 5, top + 5))
+
+        if distance != 'inf':
+            distance_text = pygame.font.SysFont(None, 18).render(distance, True, (0, 100, 255))
+            distance_width, distance_height = distance_text.get_size()
+            window_surface.blit(distance_text,
+                                (centerx - (distance_width / 2), bottom - distance_height - 5))

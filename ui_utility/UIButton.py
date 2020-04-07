@@ -1,13 +1,14 @@
 import pygame
 from typing import Tuple
 
+from pygame.sprite import Sprite
 from ui_utility.UIComponent import UIComponent
 from ui_utility.UIManager import UIManager
 
 PADDING = 10
 
 
-class UIButton(pygame.sprite.Sprite, UIComponent):
+class UIButton(Sprite, UIComponent):
     def __init__(self,
                  manager: UIManager,
                  x_pos: int,
@@ -19,7 +20,8 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
                  disable=False,
                  font_size=15,
                  padding=PADDING):
-        super().__init__()
+        Sprite.__init__(self)
+        UIComponent.__init__(self, manager)
         self.color = color
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -41,10 +43,6 @@ class UIButton(pygame.sprite.Sprite, UIComponent):
         self.button_rect = self.button.get_rect()
         self.button_rect.topleft = (x_pos, y_pos)
         self.disable = disable
-
-        # add element to the ui manager
-        manager.add_element(self)
-        self.component_id = manager.assign_id()
 
     def set_disabled(self):
         self.disable = True

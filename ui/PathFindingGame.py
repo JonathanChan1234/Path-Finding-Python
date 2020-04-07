@@ -8,8 +8,8 @@ from ui.PathFindingGrid import PathFindingGrid
 from ui_utility.UIButton import UIButton
 from ui_utility.UIText import UIText
 
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 1200
+WINDOW_HEIGHT = 900
 WHITE = (0, 0, 0)
 FPS = 60
 
@@ -33,17 +33,24 @@ class PathFindingGame:
         self.titleText = UIText(self.manager, 10, 10, (255, 255, 255), 'Path Finding Game')
 
         self.pointText = UIText(self.manager, 10, 30, (255, 255, 255), f'Distance: {self.points}')
-        self.clearAllObstacleButton = UIButton(self.manager, 600, 50, (66, 245, 99), font_size=30,
+        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), font_size=30,
                                                text="Clear All Obstacle")
-        self.setMarkerButton = UIButton(self.manager, 600, 100, (235, 64, 52), font_size=30,
+        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), font_size=30,
                                         text="Select Points")
-        self.startPathFindButton = UIButton(self.manager, 600, 150, (235, 225, 52), font_size=30,
+        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), font_size=30,
                                             text="Path Finding")
-        self.resetGridButton = UIButton(self.manager, 600, 200, (50, 72, 168), font_size=30, text="Reset All")
+        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), font_size=30, text="Reset All")
 
-        self.messageText = UIText(self.manager, 600, 350, (201, 24, 4), font_size=20,
+        self.messageText = UIText(self.manager, 1000, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)
-        self.dialog = UIDialog(self.manager, 300, 300, (255, 255, 255))
+        self.dialog = UIDialog(self.manager,
+                               width=300,
+                               height=300,
+                               background=(255, 255, 255),
+                               title='Path Finding Game',
+                               content='Click "Select Points" to set the origin/destination, '
+                                       'Click Again to select the obstacle, '
+                                       'Click Reset All to Reset the grid after path finding is finished')
 
     def refresh(self):
         # Switch cursor in different mode
@@ -103,7 +110,6 @@ class PathFindingGame:
                 if event.component_id == self.resetGridButton.component_id:
                     self.grid.reset_grid()
                 if event.component_id == self.dialog.component_id:
-                    print(event)
                     if event.event == UIDialog.CLOSE_BUTTON_CLICKED:
                         self.dialog.dismiss()
 
@@ -112,7 +118,7 @@ class PathFindingGame:
 
 
 if __name__ == '__main__':
-    grid = PathFindingGrid(20, 20)
+    grid = PathFindingGrid(15, 15)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, WHITE, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()

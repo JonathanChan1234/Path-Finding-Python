@@ -25,7 +25,7 @@ def update_node_distance(compared_node: AStarNode, current_node: AStarNode, dest
     if compared_node.get_visited():
         return
     new_g = current_node.get_distance() + weight
-    new_h = euclidean_distance(current_node, destination)
+    new_h = euclidean_distance(compared_node, destination)
     new_distance = new_g + new_h
     if compared_node.get_distance() >= new_distance:
         compared_node.set_previous(current_node)
@@ -67,7 +67,6 @@ def a_star(grid_ref: List[List[AStarNode]],
 
     # if unvisited list is not empty and the destination node is not visited yet
     while not unvisited_list.is_empty() and not destination.get_visited():
-        debug_unvisited_list(unvisited_list)
         x, y = unvisited_list.pop()
         current_node = grid[y][x]
         current_node.set_visited()
@@ -82,6 +81,7 @@ def a_star(grid_ref: List[List[AStarNode]],
                                      neighbor['distance'])
         search_result.append(copy.deepcopy(grid))
 
+    debug_unvisited_list(unvisited_list)
     path_found = destination.get_visited()
     return path_found, search_result
 

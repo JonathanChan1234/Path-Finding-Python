@@ -2,36 +2,29 @@ import os
 from typing import Tuple
 
 import pygame
-
+from pygame.freetype import Font
 from pygame.sprite import Sprite, LayeredUpdates
 
 from ui_utility.UIComponent import UIComponent
 from ui_utility.UIManager import UIManager
 
 
-class UIDialogText(Sprite):
-    DEFAULT_FONT_SIZE = 20
-    DEFAULT_LINE_SPACING = 5
+class UIDialogBackground(Sprite):
+    TitleMargin = 0.05
+    ContentMargin = 0.2
+    TitleTextSize = 0.1
+    ContentTextSize = 0.05
 
     def __init__(self,
-                 color: Tuple[int, int, int],
-                 text: str = '',
-                 width: int = 0,  # specific the text width
-                 line_spacing: int = DEFAULT_FONT_SIZE,
-                 font_size=DEFAULT_LINE_SPACING,
-                 font=None):
-        Sprite.__init__(self)
-        self.color = color
-        self.text = text
-        self.width = width
-        self.line_spacing = line_spacing
-        self.font_size = font_size
-        self.font = font
-
-
-
-class UIDialogBackground(Sprite):
-    def __init__(self, width, height, background):
+                 width: int,
+                 height: int,
+                 background: Tuple[int, int, int],
+                 title: str = '',
+                 title_color: Tuple[int, int, int] = (0, 0, 0),
+                 title_size: int = None,
+                 content: str = '',
+                 content_font_color: Tuple[int, int, int] = (0, 0, 0),
+                 content_font_size: int = None):
         Sprite.__init__(self)
         self.width = width
         self.height = height
@@ -40,6 +33,40 @@ class UIDialogBackground(Sprite):
         self.image.fill(self.background)
         self.image.set_alpha(200)
         self.rect = self.image.get_rect(center=(width, height))
+
+        # title text
+        self.title = title
+        self.title_size = title_size or round(UIDialogBackground.TitleTextSize * height)
+        self.title_color = title_color
+        title_margin = title_size if title_size else UIDialogBackground.TitleMargin * height
+        x, y = self.word_wrap(self.title, self.title_size, self.title_color, title_margin)
+
+        # content text
+        self.content = content
+        self.content_font_color = content_font_color
+        self.content_font_size = content_font_size or round(UIDialogBackground.ContentTextSize * height)
+        content_margin = y + 30
+        self.word_wrap(self.content, self.content_font_size, self.content_font_color, content_margin)
+
+    def word_wrap(self, text, size, text_color, margin):
+        font = Font(None, size)
+        font.origin = True
+        words = text.split(' ')
+        width, height = self.image.get_size()
+        line_spacing = font.get_sized_height() + 2
+        x, y = 0, line_spacing + margin
+        space = font.get_rect(' ')
+        for word in words:
+            bounds = font.get_rect(word)
+            if x + bounds.width + bounds.x >= width:
+                x, y = 0, y + line_spacing
+            if x + bounds.width + bounds.x >= width:
+                raise ValueError("word too wide for the surface")
+            if y + bounds.height - bounds.y >= height:
+                raise ValueError("text to long for the surface")
+            font.render_to(self.image, (x, y), None, text_color)
+            x += bounds.width + space.width
+        return x, y
 
     def event_handler(self, event, component_id):
         pass
@@ -71,7 +98,13 @@ class UIDialog(UIComponent, LayeredUpdates):
                  manager: UIManager,
                  width: int,
                  height: int,
-                 background: Tuple[int, int, int]):
+                 background: Tuple[int, int, int],
+                 title: str = '',
+                 title_color: Tuple[int, int, int] = (0, 0, 0),
+                 title_size: int = None,
+                 content: str = '',
+                 content_font_color: Tuple[int, int, int] = (0,0,0),
+                 content_font_size: int = None):
         if height < 200:
             raise Exception('The height of UI Dialog must be larger than 200')
         if width < 200:
@@ -80,14 +113,11 @@ class UIDialog(UIComponent, LayeredUpdates):
         self.show = True
 
         # initialize components inside the UI Dialog
-        self.background = UIDialogBackground(width, height, background)
+        self.background = UIDialogBackground(width, height, background, title, title_color, title_size, content, content_font_color, content_font_size)
         top, right = self.background.rect.topright
         self.close_button = UIDialogButton(top - UIDialogButton.BUTTON_WIDTH, right)
         LayeredUpdates.__init__(self, [self.background, self.close_button])
-
-        # added to the UI Manager
-        manager.add_element(self)
-        self.component_id = manager.assign_id()
+        UIComponent.__init__(self, manager)
 
     def dismiss(self):
         self.show = False

@@ -7,8 +7,8 @@ from algorithm.AStarNode import AStarNode
 from algorithm.astar_grid import a_star
 from ui.PathFindingNode import PathFindingNode
 
-NODE_WIDTH = 25
-NODE_HEIGHT = 25
+NODE_WIDTH = 50
+NODE_HEIGHT = 50
 X_OFFSET = 50
 Y_OFFSET = 50
 BORDER = 2
@@ -114,7 +114,7 @@ class PathFindingGrid:
         self.set_disabled(True)
         origin, destination = self.markers[0], self.markers[1]
         path_found, self.search_result = a_star(self.grid, origin, destination)
-        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 50)
+        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 10)
 
     def update_grid(self):
         # ignore the event counter when the animation is finished

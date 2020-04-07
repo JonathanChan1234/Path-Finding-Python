@@ -1,4 +1,4 @@
-from Vertex import Vertex
+from algorithm.Vertex import Vertex
 
 
 class Graph:
