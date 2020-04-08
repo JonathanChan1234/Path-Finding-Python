@@ -36,7 +36,7 @@ class PathFindingGame:
         self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), font_size=30,
                                                text="Clear All Obstacle")
         self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), font_size=30,
-                                        text="Select Points")
+                                        text="Obstacle")
         self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), font_size=30,
                                             text="Path Finding")
         self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), font_size=30, text="Reset All")
@@ -70,6 +70,12 @@ class PathFindingGame:
             self.startPathFindButton.set_disabled()
         else:
             self.startPathFindButton.set_enabled()
+
+        # change the button text when in point selection mode/ obstacle selection mode
+        if self.grid.select_marker:
+            self.setMarkerButton.set_text('Obstacles')
+        else:
+            self.setMarkerButton.set_text('Points')
 
         # disable the clear obstacle and set maker button when the animation started
         if self.grid.is_disabled():

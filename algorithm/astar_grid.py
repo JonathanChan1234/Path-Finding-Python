@@ -24,7 +24,7 @@ def update_node_distance(compared_node: AStarNode, current_node: AStarNode, dest
                          weight: Union[int, float]):
     if compared_node.get_visited():
         return
-    new_g = current_node.get_distance() + weight
+    new_g = current_node.get_g() + weight
     new_h = euclidean_distance(compared_node, destination)
     new_distance = new_g + new_h
     if compared_node.get_distance() >= new_distance:
@@ -81,7 +81,7 @@ def a_star(grid_ref: List[List[AStarNode]],
                                      neighbor['distance'])
         search_result.append(copy.deepcopy(grid))
 
-    debug_unvisited_list(unvisited_list)
+    # debug_unvisited_list(unvisited_list)
     path_found = destination.get_visited()
     return path_found, search_result
 

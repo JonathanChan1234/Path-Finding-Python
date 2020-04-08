@@ -114,7 +114,7 @@ class PathFindingGrid:
         self.set_disabled(True)
         origin, destination = self.markers[0], self.markers[1]
         path_found, self.search_result = a_star(self.grid, origin, destination)
-        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 10)
+        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 100)
 
     def update_grid(self):
         # ignore the event counter when the animation is finished
