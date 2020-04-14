@@ -3,6 +3,7 @@ from typing import Tuple
 import pygame
 
 from ui_utility.UIDialog import UIDialog
+from ui_utility.UIDropdownMenu import UIDropdownMenu
 from ui_utility.UIManager import UIManager
 from ui.PathFindingGrid import PathFindingGrid
 from ui_utility.UIButton import UIButton
@@ -10,7 +11,7 @@ from ui_utility.UIText import UIText
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 900
-WHITE = (0, 0, 0)
+BACKGROUND_COLOR = (162, 196, 250)
 FPS = 60
 
 
@@ -33,13 +34,13 @@ class PathFindingGame:
         self.titleText = UIText(self.manager, 10, 10, (255, 255, 255), 'Path Finding Game')
 
         self.pointText = UIText(self.manager, 10, 30, (255, 255, 255), f'Distance: {self.points}')
-        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), font_size=30,
-                                               text="Clear All Obstacle")
-        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), font_size=30,
+        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 30, font_size=20,
+                                               text="Clear Board")
+        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), 150, 30, font_size=20,
                                         text="Obstacle")
-        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), font_size=30,
+        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), 150, 30, font_size=20,
                                             text="Path Finding")
-        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), font_size=30, text="Reset All")
+        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), 150, 30, font_size=20, text="Reset All")
 
         self.messageText = UIText(self.manager, 1000, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)
@@ -50,9 +51,19 @@ class PathFindingGame:
                                title='Path Finding Game',
                                content='Click "Select Points" to set the origin/destination, '
                                        'Click Again to select the obstacle, '
-                                       'Click Reset All to Reset the grid after path finding is finished')
+                                       'Click Reset All to Reset the grid after path finding is finished',
+                               show=False)
+        self.dropdown_menu = UIDropdownMenu(self.manager,
+                                            x_pos=1000,
+                                            y_pos=300,
+                                            width=150,
+                                            height=50,
+                                            text_size=16,
+                                            options=['option 1', 'option 2', 'option 3', 'option 4', 'option 5'])
+        self.mouse_debug_text = UIText(self.manager, 1000, 0, (0, 0, 0), '')
 
     def refresh(self):
+        self.mouse_debug_text.set_text(f'{str(pygame.mouse.get_pos()[0])}, {str(pygame.mouse.get_pos()[1])}')
         # Switch cursor in different mode
         if self.grid.select_marker:
             pygame.mouse.set_cursor(*pygame.cursors.broken_x)
@@ -118,6 +129,8 @@ class PathFindingGame:
                 if event.component_id == self.dialog.component_id:
                     if event.event == UIDialog.CLOSE_BUTTON_CLICKED:
                         self.dialog.dismiss()
+                if event.component_id == self.dropdown_menu.component_id:
+                    print(event)
 
     def switch_mode(self):
         self.grid.switch_mode()
@@ -125,7 +138,7 @@ class PathFindingGame:
 
 if __name__ == '__main__':
     grid = PathFindingGrid(15, 15)
-    path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, WHITE, grid)
+    path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BACKGROUND_COLOR, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()
         path_finding_game.refresh()

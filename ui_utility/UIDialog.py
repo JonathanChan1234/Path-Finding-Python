@@ -104,13 +104,14 @@ class UIDialog(UIComponent, LayeredUpdates):
                  title_size: int = None,
                  content: str = '',
                  content_font_color: Tuple[int, int, int] = (0,0,0),
-                 content_font_size: int = None):
+                 content_font_size: int = None,
+                 show: bool = True):
         if height < 200:
             raise Exception('The height of UI Dialog must be larger than 200')
         if width < 200:
             raise Exception('The width of UI Dialog must be larger than 200')
 
-        self.show = True
+        self.show = show
 
         # initialize components inside the UI Dialog
         self.background = UIDialogBackground(width, height, background, title, title_color, title_size, content, content_font_color, content_font_size)

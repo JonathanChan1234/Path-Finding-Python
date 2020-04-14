@@ -1,26 +1,29 @@
 import pygame
 from typing import Tuple
 
-from pygame.sprite import Sprite
+from pygame.sprite import Sprite, Group
+from pygame.surface import Surface
+
 from ui_utility.UIComponent import UIComponent
 from ui_utility.UIManager import UIManager
+from ui_utility.utils import render_inline_text
 
 PADDING = 10
 
 
-class UIButton(Sprite, UIComponent):
+class UIButton(Group, UIComponent):
     def __init__(self,
                  manager: UIManager,
                  x_pos: int,
                  y_pos: int,
                  color: Tuple[int, int, int],
-                 width: int = None,
-                 height: int = None,
+                 width: int,
+                 height: int,
                  text='Test Button',
                  disable=False,
                  font_size=15,
                  padding=PADDING):
-        Sprite.__init__(self)
+        Group.__init__(self)
         UIComponent.__init__(self, manager)
         self.color = color
         self.x_pos = x_pos
@@ -31,22 +34,19 @@ class UIButton(Sprite, UIComponent):
         self.disable = disable
         self.font_size = font_size
         self.padding = padding
-        self.ui_text, self.button, self.button_rect = self.ui_components()
-
-    # obtain all the components inside the UI button
-    def ui_components(self):
-        ui_text = pygame.font.SysFont(None, self.font_size).render(self.text, True, (0, 0, 0))
-        text_width, text_height = ui_text.get_size()
-        self.width = self.width or (text_width + self.padding)
-        self.height = self.height or (text_height + self.padding)
-        button = pygame.Surface([self.width, self.height])
-        button.fill(self.color)
-        button_rect = button.get_rect()
-        button_rect.topleft = (self.x_pos, self.y_pos)
-        return ui_text, button, button_rect
+        self.color = color
+        self.button = Sprite()
+        self.button.image = Surface([width, height])
+        self.button.image.fill(color)
+        render_inline_text(self.button.image, self.text, self.font_size, (0, 0, 0))
+        self.button.rect = self.button.image.get_rect()
+        self.button.rect.topleft = (x_pos, y_pos)
+        self.add(self.button)
 
     def set_text(self, text: str):
         self.text = text
+        self.button.image.fill(self.color)
+        render_inline_text(self.button.image, self.text, self.font_size, (0, 0, 0))
 
     def set_disabled(self):
         self.disable = True
@@ -59,17 +59,13 @@ class UIButton(Sprite, UIComponent):
         if self.disable:
             return
         if event.type == pygame.MOUSEBUTTONDOWN and \
-                self.button_rect.collidepoint(pygame.mouse.get_pos()):
+                self.button.rect.collidepoint(pygame.mouse.get_pos()):
             pygame.event.post(pygame.event.Event(UIManager.BUTTON_EVENT_ID, {'component_id': self.component_id}))
 
     def render(self, window_surface: pygame.SurfaceType):
-        self.ui_text, self.button, self.button_rect = self.ui_components()
-        text_width, text_height = self.ui_text.get_size()
-        window_surface.blit(self.button, self.button_rect)
-        x_offset = (self.width - text_width) / 2
-        y_offset = (self.height - text_height) / 2
         if self.disable:
-            self.button.set_alpha(100)
+            self.button.image.set_alpha(100)
         else:
-            self.button.set_alpha(255)
-        window_surface.blit(self.ui_text, (x_offset + self.x_pos, y_offset + self.y_pos))
+            self.button.image.set_alpha(255)
+        self.draw(window_surface)
+
