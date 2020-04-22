@@ -10,7 +10,7 @@ from ui_utility.UIButton import UIButton
 from ui_utility.UIText import UIText
 
 WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 900
+WINDOW_HEIGHT = 800
 BACKGROUND_COLOR = (162, 196, 250)
 FPS = 60
 
