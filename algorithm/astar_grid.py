@@ -1,12 +1,11 @@
 import copy
 import math
 import sys
-import timeit
-from datetime import datetime
+
 from typing import List, Union
 
 from algorithm.AStarNode import AStarNode
-from algorithm.PriorityQueue import PriorityQueue
+from algorithm.PriorityHeapQueue import PriorityHeapQueue
 
 VERTICAL_DISTANCE = 1
 HORIZONTAL_DISTANCE = 1
@@ -37,6 +36,10 @@ def euclidean_distance(point1, point2):
     return math.sqrt(math.pow(point1.x - point2.x, 2) + math.pow(point1.y - point2.y, 2))
 
 
+def comparator(self: AStarNode, other: AStarNode):
+    return self.get_distance() - other.get_distance()
+
+
 def a_star(grid_ref: List[List[AStarNode]],
            origin_ref: AStarNode,
            destination_ref: AStarNode):
@@ -47,7 +50,7 @@ def a_star(grid_ref: List[List[AStarNode]],
     origin.set_h(0)
 
     # initialize the priority queue
-    unvisited_list = PriorityQueue()
+    unvisited_list = PriorityHeapQueue([], comparator)
     for y in range(len(grid)):
         for x in range(len(grid[y])):
             if check_valid_block(x, y, grid):
@@ -67,10 +70,9 @@ def a_star(grid_ref: List[List[AStarNode]],
 
     # if unvisited list is not empty and the destination node is not visited yet
     while not unvisited_list.is_empty() and not destination.get_visited():
-        x, y = unvisited_list.pop()
-        current_node = grid[y][x]
+        current_node = unvisited_list.pop()
         current_node.set_visited()
-        print(f'Current AStarNode {str(current_node)}:')
+        print(f'Current Node {str(current_node)}:')
         for neighbor in neighbors:
             neighbor_x = current_node.x + neighbor['coordinate'][0]
             neighbor_y = current_node.y + neighbor['coordinate'][1]
@@ -81,15 +83,8 @@ def a_star(grid_ref: List[List[AStarNode]],
                                      neighbor['distance'])
         search_result.append(copy.deepcopy(grid))
 
-    # debug_unvisited_list(unvisited_list)
     path_found = destination.get_visited()
     return path_found, search_result
-
-
-def debug_unvisited_list(unvisited_list: PriorityQueue):
-    for node in unvisited_list:
-        if node.get_distance() != sys.maxsize:
-            print(f'{node.get_coordinate()}, f = {node.get_distance()}')
 
 
 def astar_test() -> float:

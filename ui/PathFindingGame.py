@@ -137,7 +137,7 @@ class PathFindingGame:
 
 
 if __name__ == '__main__':
-    grid = PathFindingGrid(15, 15)
+    grid = PathFindingGrid(15, 13)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BACKGROUND_COLOR, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()

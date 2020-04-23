@@ -7,10 +7,11 @@ T = TypeVar('T')
 
 
 class PriorityHeapQueue:
-    def __init__(self, elements: List[T], comparator: Callable[[T, T], int]):
+    def __init__(self, elements: List[T], comparator: Callable[[T, T], float]):
         self.queue: List[T] = elements
         self.comparator: Callable[[T, T], int] = comparator
-        # heapify the entire tree
+
+    def heapify_tree(self):
         for index in reversed(range(math.ceil(len(self.queue) / 2) - 1)):
             self.heapify(index)
 
@@ -19,6 +20,7 @@ class PriorityHeapQueue:
         self.insertion_heapify(len(self.queue) - 1)
 
     def pop(self):
+        self.heapify_tree()
         self.swap(0, len(self.queue) - 1)
         element = self.queue.pop()
         self.heapify(0)
@@ -31,7 +33,7 @@ class PriorityHeapQueue:
         parent_node = math.floor((index - 1) / 2)
         if parent_node < 0:
             return
-        if self.comparator(self.queue[parent_node], self.queue[index]) < 0:
+        if self.comparator(self.queue[index], self.queue[parent_node]) < 0:
             self.swap(parent_node, index)
             self.insertion_heapify(parent_node)
 
@@ -52,18 +54,24 @@ class PriorityHeapQueue:
         self.queue[first] = self.queue[second]
         self.queue[second] = temp
 
+    def is_empty(self):
+        return len(self.queue) == 0
+
     def queue_debug(self):
-        for index in range(len(self.queue)):
-            print(self.queue[index])
+        print(', '.join(map(lambda element: str(element), self.queue)))
 
 
-def comparator(i: int, j: int) -> int:
+def comparator(i: int, j: int) -> float:
     return i - j
 
 
 if __name__ == '__main__':
     priority_queue = PriorityHeapQueue([20, 14, 3, 1, 11, 7], comparator)
+    print('initial insertion')
     priority_queue.queue_debug()
     priority_queue.insert(6)
     priority_queue.insert(5)
+    print('after inserting 6 and 5')
+    priority_queue.queue_debug()
+    priority_queue.pop()
     priority_queue.queue_debug()

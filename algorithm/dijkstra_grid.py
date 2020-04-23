@@ -1,6 +1,7 @@
+import copy
 from typing import List, Union
 from algorithm.DijkstraNode import DijkstraNode
-from algorithm.PriorityQueue import PriorityQueue
+from algorithm.PriorityHeapQueue import PriorityHeapQueue
 
 ROW = 10
 COLUMN = 10
@@ -52,26 +53,17 @@ def update_node_distance(compared_node: DijkstraNode, current_node: DijkstraNode
         if compared_node.get_distance() > new_distance:
             compared_node.set_previous(current_node)
             compared_node.set_distance(new_distance)
-            print(f"Updated for the vertex {str(compared_node)}"
-                  f"(New Distance {new_distance} > Original Distance {compared_node.get_distance()})")
-        else:
-            print(f"Updated for the vertex {str(compared_node)}"
-                  f"(New Distance {new_distance} < Original Distance {compared_node.get_distance()})")
 
 
-def check_destination(destination: DijkstraNode = None) -> bool:
-    if destination is None:
-        return True
-    if destination.get_visited():
-        return False
-    return True
-
-
-def check_out_of_range(x: int, y: int, grid: List[List[DijkstraNode]]) -> bool:
+def check_valid_block(x: int, y: int, grid: List[List[DijkstraNode]]) -> bool:
     # Check the node is inside the grid and not an obstacle
     if 0 <= y < len(grid) and 0 <= x < len(grid[y]) and not grid[y][x].is_obstacle():
         return True
     return False
+
+
+def comparator(self: DijkstraNode, other: DijkstraNode):
+    return self.get_distance() - other.get_distance()
 
 
 def dijkstra(grid: List[List[DijkstraNode]], origin: DijkstraNode, destination: DijkstraNode = None):
@@ -80,63 +72,49 @@ def dijkstra(grid: List[List[DijkstraNode]], origin: DijkstraNode, destination: 
 
     # create an unvisited vertex list
     # push all the node other than the origin to the list
-    unvisited_list = PriorityQueue()
+    unvisited_list = PriorityHeapQueue([], comparator)
     for nodeList in grid:
         for node in nodeList:
             if not node.is_obstacle():
                 unvisited_list.insert(node)
 
-    while not unvisited_list.is_empty() and check_destination(destination):
-        print(check_destination(destination))
+    neighbors = [
+        {'distance': VERTICAL_DISTANCE, 'coordinate': [0, -1]},
+        {'distance': HORIZONTAL_DISTANCE, 'coordinate': [-1, 0]},
+        {'distance': HORIZONTAL_DISTANCE, 'coordinate': [1, 0]},
+        {'distance': VERTICAL_DISTANCE, 'coordinate': [0, 1]},
+        {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, -1]},
+        {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, -1]},
+        {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, 1]},
+        {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, 1]}
+    ]
+    search_result: List[List[List[DijkstraNode]]] = []
+
+    while not unvisited_list.is_empty() and not destination.get_visited():
         # Find the nearest node first (node with the smallest distance)
-        x, y = unvisited_list.pop()
-        current_node = grid[y][x]
+        current_node = unvisited_list.pop()
 
         # Set the current node to be "visited"
         current_node.set_visited()
+        for neighbor in neighbors:
+            neighbor_x = current_node.x + neighbor['coordinate'][0]
+            neighbor_y = current_node.y + neighbor['coordinate'][1]
 
-        print(f'Current DijkstraNode {str(current_node)}:')
+            if check_valid_block(neighbor_x, neighbor_y, grid):
+                update_node_distance(grid[neighbor_y][neighbor_x],
+                                     current_node,
+                                     neighbor['distance'])
+        search_result.append(copy.deepcopy(grid))
 
-        # Find all the neighbor nodes (vertical, horizontal, diagonal)
-        # top
-        if check_out_of_range(current_node.x, current_node.y - 1, grid):
-            update_node_distance(grid[current_node.y - 1][current_node.x], current_node, VERTICAL_DISTANCE)
-
-        # top-left
-        if check_out_of_range(current_node.x - 1, current_node.y - 1, grid):
-            update_node_distance(grid[current_node.y - 1][current_node.x - 1], current_node, DIAGONAL_DISTANCE)
-
-        # top-right
-        if check_out_of_range(current_node.x + 1, current_node.y - 1, grid):
-            update_node_distance(grid[current_node.y - 1][current_node.x + 1], current_node, DIAGONAL_DISTANCE)
-
-        # left
-        if check_out_of_range(current_node.x - 1, current_node.y, grid):
-            update_node_distance(grid[current_node.y][current_node.x - 1], current_node, HORIZONTAL_DISTANCE)
-
-        # right
-        if check_out_of_range(current_node.x + 1, current_node.y, grid):
-            update_node_distance(grid[current_node.y][current_node.x + 1], current_node, HORIZONTAL_DISTANCE)
-
-        # bottom-left
-        if check_out_of_range(current_node.x - 1, current_node.y + 1, grid):
-            update_node_distance(grid[current_node.y + 1][current_node.x - 1], current_node, DIAGONAL_DISTANCE)
-
-        # bottom-right
-        if check_out_of_range(current_node.x + 1, current_node.y + 1, grid):
-            update_node_distance(grid[current_node.y + 1][current_node.x + 1], current_node, DIAGONAL_DISTANCE)
-
-        # bottom
-        if check_out_of_range(current_node.x, current_node.y + 1, grid):
-            update_node_distance(grid[current_node.y + 1][current_node.x], current_node, VERTICAL_DISTANCE)
-    return grid
+    # debug_unvisited_list(unvisited_list)
+    path_found = destination.get_visited()
+    return path_found, search_result
 
 
 if __name__ == '__main__':
     # initialize the grid
     test_grid: List[List[DijkstraNode]] = []
     init_grid(test_grid, ROW, COLUMN)
-    debug_grid(test_grid)
     print("-------after path finding--------")
 
     origin = test_grid[0][0]
@@ -151,6 +129,7 @@ if __name__ == '__main__':
     test_grid[1][2].set_obstacle()
     test_grid[1][3].set_obstacle()
     test_grid[2][2].set_obstacle()
-    dijkstra(test_grid, origin, destination)
-    debug_grid(test_grid)
+    path_found, search_result = dijkstra(test_grid, origin, destination)
+    print(path_found)
+    # debug_grid(test_grid)
     debug_shortest_path(test_grid, origin, destination)
