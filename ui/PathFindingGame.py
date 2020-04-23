@@ -34,13 +34,13 @@ class PathFindingGame:
         self.titleText = UIText(self.manager, 10, 10, (255, 255, 255), 'Path Finding Game')
 
         self.pointText = UIText(self.manager, 10, 30, (255, 255, 255), f'Distance: {self.points}')
-        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 30, font_size=20,
+        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 40, font_size=20,
                                                text="Clear Board")
-        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), 150, 30, font_size=20,
+        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), 150, 40, font_size=20,
                                         text="Obstacle")
-        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), 150, 30, font_size=20,
+        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), 150, 40, font_size=20,
                                             text="Path Finding")
-        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), 150, 30, font_size=20, text="Reset All")
+        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), 150, 40, font_size=20, text="Reset All")
 
         self.messageText = UIText(self.manager, 1000, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)

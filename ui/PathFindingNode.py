@@ -65,7 +65,7 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
 
         # other properties
         self.marked = False
-        self.state: PathFindingNodeState = PathFindingNodeState.UNVISITED
+        self.is_path = False
 
         # marker
         # set marker to the middle of the node block
@@ -84,69 +84,51 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
         return self.marked
 
     def set_path(self):
-        self.state = PathFindingNodeState.PATH
+        self.is_path = True
 
     def check_crash(self, pos: Tuple[int, int]):
         return self.block_rect.collidepoint(pos)
 
-    def set_g(self, g):
-        AStarNode.set_g(self, g)
-        if self.get_distance() != sys.maxsize:
-            self.state = PathFindingNodeState.SEARCHED
-
-    def set_h(self, h):
-        AStarNode.set_h(self, h)
-        if self.get_distance() != sys.maxsize:
-            self.state = PathFindingNodeState.SEARCHED
-
-    def set_visited(self):
-        AStarNode.set_visited(self)
-        if self.get_visited():
-            self.state = PathFindingNodeState.VISITED
-
-    def set_obstacle(self, obstacle: bool = True):
-        AStarNode.set_obstacle(self, obstacle)
-        self.state = PathFindingNodeState.OBSTACLE if obstacle else PathFindingNodeState.UNVISITED
-
     def render(self, window_surface: pygame.SurfaceType):
-        if self.state == PathFindingNodeState.UNVISITED:
-            self.block.fill(UNVISITED_COLOR)
-        elif self.state == PathFindingNodeState.OBSTACLE:
+        if self.is_obstacle():
             self.block.fill(OBSTACLE_COLOR)
-        elif self.state == PathFindingNodeState.VISITED:
-            self.block.fill(VISITED_COLOR)
-        elif self.state == PathFindingNodeState.SEARCHED:
-            self.block.fill(SEARCHED_COLOR)
-        elif self.state == PathFindingNodeState.PATH:
-            self.block.fill(PATH_COLOR)
-        if self.marked:
+        elif self.marked:
             self.block.fill(MARKER_COLOR)
-            # window_surface.blit(self.marker, self.marker_rect)
+        elif self.is_path:
+            self.block.fill(PATH_COLOR)
+        elif self.get_visited():
+            self.block.fill(VISITED_COLOR)
+        else:
+            if self.get_distance() == sys.maxsize:
+                self.block.fill(UNVISITED_COLOR)
+            else:
+                self.block.fill(SEARCHED_COLOR)
+
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
 
-        distance = 'inf' if self.get_distance() == sys.maxsize else str(round(self.get_distance(), 1))
-        g_distance = 'inf' if self.get_g() == sys.maxsize / 2 else str(round(self.get_g(), 1))
-        h_distance = 'inf' if self.get_h() == sys.maxsize / 2 else str(round(self.get_h(), 1))
-
-        top = self.border_rect.top
-        left = self.border_rect.left
-        right = self.border_rect.right
-        bottom = self.border_rect.bottom
-        centerx = self.border_rect.centerx
-
-        if g_distance != 'inf':
-            g_distance_text = pygame.font.SysFont(None, 16).render(g_distance, True, (255, 255, 255))
-            window_surface.blit(g_distance_text,
-                                (left + 5, top + 5))
-        if h_distance != 'inf':
-            h_distance_text = pygame.font.SysFont(None, 16).render(h_distance, True, (0, 0, 0))
-            h_distance_width = h_distance_text.get_width()
-            window_surface.blit(h_distance_text,
-                                (right - h_distance_width - 5, top + 5))
-
-        if distance != 'inf':
-            distance_text = pygame.font.SysFont(None, 18).render(distance, True, (0, 100, 255))
-            distance_width, distance_height = distance_text.get_size()
-            window_surface.blit(distance_text,
-                                (centerx - (distance_width / 2), bottom - distance_height - 5))
+        # distance = 'inf' if self.get_distance() == sys.maxsize else str(round(self.get_distance(), 1))
+        # g_distance = 'inf' if self.get_g() == sys.maxsize / 2 else str(round(self.get_g(), 1))
+        # h_distance = 'inf' if self.get_h() == sys.maxsize / 2 else str(round(self.get_h(), 1))
+        #
+        # top = self.border_rect.top
+        # left = self.border_rect.left
+        # right = self.border_rect.right
+        # bottom = self.border_rect.bottom
+        # centerx = self.border_rect.centerx
+        #
+        # if g_distance != 'inf':
+        #     g_distance_text = pygame.font.SysFont(None, 16).render(g_distance, True, (255, 255, 255))
+        #     window_surface.blit(g_distance_text,
+        #                         (left + 5, top + 5))
+        # if h_distance != 'inf':
+        #     h_distance_text = pygame.font.SysFont(None, 16).render(h_distance, True, (0, 0, 0))
+        #     h_distance_width = h_distance_text.get_width()
+        #     window_surface.blit(h_distance_text,
+        #                         (right - h_distance_width - 5, top + 5))
+        #
+        # if distance != 'inf':
+        #     distance_text = pygame.font.SysFont(None, 18).render(distance, True, (0, 100, 255))
+        #     distance_width, distance_height = distance_text.get_size()
+        #     window_surface.blit(distance_text,
+        #                         (centerx - (distance_width / 2), bottom - distance_height - 5))

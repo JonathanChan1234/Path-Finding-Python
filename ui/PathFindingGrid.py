@@ -7,8 +7,8 @@ from algorithm.AStarNode import AStarNode
 from algorithm.astar_grid import a_star
 from ui.PathFindingNode import PathFindingNode
 
-NODE_WIDTH = 50
-NODE_HEIGHT = 50
+NODE_WIDTH = 30
+NODE_HEIGHT = 30
 X_OFFSET = 50
 Y_OFFSET = 50
 BORDER = 2
@@ -127,6 +127,8 @@ class PathFindingGrid:
 
         # draw the final path
         if len(self.search_result) == 0:
+            print(self.markers[0].marked)
+            print(self.markers[1].marked)
             next_point = self.markers[1]
             while next_point.get_previous() is not None:
                 next_point.set_path()
@@ -150,7 +152,6 @@ class PathFindingGrid:
         self.set_path_find_finished(False)
         self.markers.clear()
         self.search_result.clear()
-        pass
 
     def event_handler(self, event):
         if event.type == PathFindingGrid.PATH_ANIMATION_ID and \
