@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from algorithm.AStarNode import AStarNode
 from algorithm.astar_grid import a_star
+from algorithm.dijkstra_grid import dijkstra
 from ui.PathFindingNode import PathFindingNode
 
 NODE_WIDTH = 50
@@ -120,7 +121,7 @@ class PathFindingGrid:
             raise Exception("Missing Origin/Destination Point")
         self.set_disabled(True)
         origin, destination = self.markers[0], self.markers[1]
-        path_found, self.search_result = a_star(self.grid, origin, destination)
+        path_found, self.search_result = dijkstra(self.grid, origin, destination)
         pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 100)
 
     def update_grid(self):
@@ -129,28 +130,17 @@ class PathFindingGrid:
             return
 
         # draw the immediate result (animation)
-        search_result_history = self.search_result.pop(0)
-        self.copy_grid(search_result_history)
+        immediate_result = self.search_result.pop(0)
+        self.grid = immediate_result
 
         # draw the final path
         if len(self.search_result) == 0:
-            next_point = self.markers[1]
-            while next_point.get_previous() is not None:
+            next_point = immediate_result[self.markers[1].y][self.markers[1].x]
+            while next_point.get_previous():
+                print(next_point.x, next_point.y)
                 next_point.set_path()
                 next_point = next_point.get_previous()
             self.set_path_find_finished(True)
-
-    def copy_grid(self, copy_grid: List[List[Node]]):
-        for row in range(len(copy_grid)):
-            for column in range(len(copy_grid[row])):
-                self.grid[row][column] = copy_grid[row][column]
-                # self.grid[row][column].set_g(copy_grid[row][column].get_g())
-                # self.grid[row][column].set_h(copy_grid[row][column].get_h())
-                # if copy_grid[row][column].get_previous():
-                #     previous_node = copy_grid[row][column].get_previous()
-                #     self.grid[row][column].set_previous(self.grid[previous_node.y][previous_node.x])
-                # if copy_grid[row][column].get_visited():
-                #     self.grid[row][column].set_visited()
 
     def reset_grid(self):
         self.init_grid()

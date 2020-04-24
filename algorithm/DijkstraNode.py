@@ -22,7 +22,7 @@ class DijkstraNode(Node):
         return self.previous
 
     def distance_debug(self):
-        if self.distance != sys.maxsize:
+        if self.distance == sys.maxsize:
             return 'inf'
         else:
             return f'f: {round(self.get_distance(), 2)}'

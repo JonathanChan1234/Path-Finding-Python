@@ -9,7 +9,7 @@ T = TypeVar('T')
 class PriorityHeapQueue:
     def __init__(self, elements: List[T], comparator: Callable[[T, T], float]):
         self.queue: List[T] = elements
-        self.comparator: Callable[[T, T], int] = comparator
+        self.comparator: Callable[[T, T], float] = comparator
 
     def heapify_tree(self):
         for index in reversed(range(math.ceil(len(self.queue) / 2) - 1)):

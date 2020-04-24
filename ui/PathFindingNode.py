@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import os
 import sys
@@ -98,7 +100,26 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
         if self.get_distance() != sys.maxsize:
             if type(self.distance_debug()) is list:
                 render_multiline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
-            if type(self.distance_debug()) is str:
+            if type(self.distance_debug()) == str:
                 render_inline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
+
+    def set_previous(self, previous: PathFindingNode):
+        self.previous = previous
+
+    def get_previous(self) -> PathFindingNode:
+        return self.previous
+
+    def __deepcopy__(self, memodict={}):
+        copy_node = PathFindingNode(self.width,
+                                    self.height,
+                                    self.border_width,
+                                    self.x_pos,
+                                    self.y_pos,
+                                    self.x,
+                                    self.y)
+        copy_node.is_obstacle = self.is_obstacle
+        copy_node.is_path = self.is_path
+        copy_node.marked = self.marked
+        return copy_node
