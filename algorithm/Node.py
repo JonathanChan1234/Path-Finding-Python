@@ -40,6 +40,9 @@ class Node:
     def get_coordinate(self) -> str:
         return f'({self.x}, {self.y})'
 
+    def distance_debug(self):
+        pass
+
     def __eq__(self, other: Node):
         return self.x == other.x and self.y == other.y
 

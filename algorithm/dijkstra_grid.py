@@ -8,6 +8,7 @@ COLUMN = 10
 VERTICAL_DISTANCE = 1
 HORIZONTAL_DISTANCE = 1
 DIAGONAL_DISTANCE = 1.4  # sqrt(2)
+DIJKSTRA = "Dijkstra"
 
 
 def debug_grid(grid: List[List[DijkstraNode]]):

@@ -60,7 +60,7 @@ class UIDropdownMenu(Group, UIComponent):
         for option in self.options:
             y_pos = selector.rect.bottom + UIDropdownMenu.Selector.BORDER_MARGIN
             selector = self.Selector(self.x_pos, y_pos, self.width, self.height, self.background, self.text_size,
-                                     self.text_color, option)
+                                     self.text_color, option, False)
             self.add(selector)
 
     def event_handler(self, event):
@@ -102,16 +102,18 @@ class UIDropdownMenu(Group, UIComponent):
                      background: Tuple[int, int, int],
                      text_size: int,
                      text_color: Tuple[int, int, int],
-                     value: str):
+                     value: str,
+                     closed: bool = True):
             Sprite.__init__(self)
             self.value = value
             self.image = Surface([width, height])
             self.image.fill(background)
             image_array = np.array(surfarray.array3d(self.image))
-            image_array[:, :5, :] = np.zeros((1, 1, 1))
-            image_array[:, -5:, :] = np.zeros((1, 1, 1))
-            image_array[:5, :, :] = np.zeros((1, 1, 1))
-            image_array[-5:, :, :] = np.zeros((1, 1, 1))
+            if closed:
+                image_array[:, :5, :] = np.zeros((1, 1, 1))
+                image_array[:, -5:, :] = np.zeros((1, 1, 1))
+                image_array[:5, :, :] = np.zeros((1, 1, 1))
+                image_array[-5:, :, :] = np.zeros((1, 1, 1))
             border_image = surfarray.make_surface(image_array)
             self.image = border_image
             x, y = render_inline_text(self.image, value, text_size, text_color,

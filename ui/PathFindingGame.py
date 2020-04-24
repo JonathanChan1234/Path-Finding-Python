@@ -2,6 +2,8 @@ from typing import Tuple
 
 import pygame
 
+from algorithm.astar_grid import A_STAR
+from algorithm.dijkstra_grid import DIJKSTRA
 from ui_utility.UIDialog import UIDialog
 from ui_utility.UIDropdownMenu import UIDropdownMenu
 from ui_utility.UIManager import UIManager
@@ -13,6 +15,7 @@ WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 BACKGROUND_COLOR = (162, 196, 250)
 FPS = 60
+ALGORITHM_LIST = [A_STAR, DIJKSTRA]
 
 
 class PathFindingGame:
@@ -59,7 +62,7 @@ class PathFindingGame:
                                             width=150,
                                             height=50,
                                             text_size=16,
-                                            options=['option 1', 'option 2', 'option 3', 'option 4', 'option 5'])
+                                            options=ALGORITHM_LIST)
         self.mouse_debug_text = UIText(self.manager, 1000, 0, (0, 0, 0), '')
 
     def refresh(self):
@@ -130,14 +133,15 @@ class PathFindingGame:
                     if event.event == UIDialog.CLOSE_BUTTON_CLICKED:
                         self.dialog.dismiss()
                 if event.component_id == self.dropdown_menu.component_id:
-                    print(event)
+                    # change the algorithm according to the value
+                    pass
 
     def switch_mode(self):
         self.grid.switch_mode()
 
 
 if __name__ == '__main__':
-    grid = PathFindingGrid(15, 13)
+    grid = PathFindingGrid(A_STAR, 15, 13)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BACKGROUND_COLOR, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()

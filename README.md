@@ -22,5 +22,5 @@
 ### Build
 ````
 pip install pygame
-python ui PathFindingGame.py
+python ui/PathFindingGame.py
 ````

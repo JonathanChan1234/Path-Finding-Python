@@ -1,12 +1,12 @@
 import math
 import os
 import sys
-from enum import Enum
 
 import pygame
 from typing import Tuple
 
-from algorithm.AStarNode import AStarNode
+from algorithm.Node import Node
+from ui_utility.utils import render_inline_text, render_multiline_text
 
 UNVISITED_COLOR = (50, 129, 168)
 OBSTACLE_COLOR = (255, 255, 0)
@@ -17,15 +17,7 @@ MARKER_COLOR = (245, 120, 66)
 BORDER_COLOR = (0, 0, 0)
 
 
-class PathFindingNodeState(Enum):
-    UNVISITED = 1
-    SEARCHED = 2
-    OBSTACLE = 3
-    VISITED = 4  # shortest path to this node is found
-    PATH = 5
-
-
-class PathFindingNode(pygame.sprite.Sprite, AStarNode):
+class PathFindingNode(pygame.sprite.Sprite, Node):
     def __init__(self,
                  width: int,
                  height: int,
@@ -36,7 +28,7 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
                  y: int):
         # constructor
         pygame.sprite.Sprite.__init__(self)
-        AStarNode.__init__(self, x, y)
+        Node.__init__(self, x, y)
 
         # node properties
         self.width = width
@@ -103,32 +95,10 @@ class PathFindingNode(pygame.sprite.Sprite, AStarNode):
                 self.block.fill(UNVISITED_COLOR)
             else:
                 self.block.fill(SEARCHED_COLOR)
-
+        if self.get_distance() != sys.maxsize:
+            if type(self.distance_debug()) is list:
+                render_multiline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
+            if type(self.distance_debug()) is str:
+                render_inline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
-
-        # distance = 'inf' if self.get_distance() == sys.maxsize else str(round(self.get_distance(), 1))
-        # g_distance = 'inf' if self.get_g() == sys.maxsize / 2 else str(round(self.get_g(), 1))
-        # h_distance = 'inf' if self.get_h() == sys.maxsize / 2 else str(round(self.get_h(), 1))
-        #
-        # top = self.border_rect.top
-        # left = self.border_rect.left
-        # right = self.border_rect.right
-        # bottom = self.border_rect.bottom
-        # centerx = self.border_rect.centerx
-        #
-        # if g_distance != 'inf':
-        #     g_distance_text = pygame.font.SysFont(None, 16).render(g_distance, True, (255, 255, 255))
-        #     window_surface.blit(g_distance_text,
-        #                         (left + 5, top + 5))
-        # if h_distance != 'inf':
-        #     h_distance_text = pygame.font.SysFont(None, 16).render(h_distance, True, (0, 0, 0))
-        #     h_distance_width = h_distance_text.get_width()
-        #     window_surface.blit(h_distance_text,
-        #                         (right - h_distance_width - 5, top + 5))
-        #
-        # if distance != 'inf':
-        #     distance_text = pygame.font.SysFont(None, 18).render(distance, True, (0, 100, 255))
-        #     distance_width, distance_height = distance_text.get_size()
-        #     window_surface.blit(distance_text,
-        #                         (centerx - (distance_width / 2), bottom - distance_height - 5))

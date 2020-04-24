@@ -1,7 +1,5 @@
 import copy
 import math
-import sys
-
 from typing import List, Union
 
 from algorithm.AStarNode import AStarNode
@@ -10,6 +8,8 @@ from algorithm.PriorityHeapQueue import PriorityHeapQueue
 VERTICAL_DISTANCE = 1
 HORIZONTAL_DISTANCE = 1
 DIAGONAL_DISTANCE = 1.4  # sqrt(2)
+
+A_STAR = 'A*'
 
 
 # check whether it is the valid block (inside the grid and not an obstacle)
