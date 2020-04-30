@@ -7,14 +7,10 @@ class Node:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.adjacent = {}  # key: Node Object, value: weight
         self.distance = sys.maxsize
         self.visited = False
         self.obstacle = False
         self.previous = None
-
-    def add_neighbor(self, neighbor, weight: int = 0) -> None:
-        self.adjacent[neighbor] = weight
 
     def set_distance(self, distance):
         self.distance = distance
@@ -42,9 +38,6 @@ class Node:
 
     def get_coordinate(self) -> str:
         return f'({self.x}, {self.y})'
-
-    def distance_debug(self):
-        pass
 
     def __eq__(self, other: Node):
         return self.x == other.x and self.y == other.y

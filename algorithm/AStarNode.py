@@ -38,20 +38,10 @@ class AStarNode(Node):
             return sys.maxsize
         return self.g + self.h
 
-    def distance_debug(self):
-        if self.g == sys.maxsize / 2 and self.h == sys.maxsize / 2:
-            return ['inf', 'inf', 'inf']
+    def debug_text(self):
+        if self.get_distance() == sys.maxsize:
+            return ''
         else:
             return [f'g: {round(self.get_g(), 2)}',
                     f'h: {round(self.get_h(), 2)}',
                     f'f: {round(self.get_distance(), 2)}']
-
-    def __deepcopy__(self, memodict={}):
-        copyNode = AStarNode(self.x, self.y)
-        if self.get_visited():
-            copyNode.set_visited()
-        copyNode.set_obstacle(self.obstacle)
-        copyNode.set_previous(self.previous)
-        copyNode.set_g(self.g)
-        copyNode.set_h(self.h)
-        return copyNode

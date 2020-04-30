@@ -10,6 +10,7 @@ from ui_utility.UIManager import UIManager
 from ui.PathFindingGrid import PathFindingGrid
 from ui_utility.UIButton import UIButton
 from ui_utility.UIText import UIText
+from worker.async_test import AsyncAlgorithmThread
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
@@ -134,7 +135,9 @@ class PathFindingGame:
                         self.dialog.dismiss()
                 if event.component_id == self.dropdown_menu.component_id:
                     # change the algorithm according to the value
-                    pass
+                    self.grid.set_algorithm(event.value)
+            if event.type == AsyncAlgorithmThread.EVENT_ID:
+                print(event)
 
     def switch_mode(self):
         self.grid.switch_mode()

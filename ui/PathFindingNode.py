@@ -5,7 +5,7 @@ import os
 import sys
 
 import pygame
-from typing import Tuple
+from typing import Tuple, Union, List
 
 from algorithm.Node import Node
 from ui_utility.utils import render_inline_text, render_multiline_text
@@ -60,6 +60,7 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
         # other properties
         self.marked = False
         self.is_path = False
+        self.debug_text: Union[str, List[str]] = ''
 
         # marker
         # set marker to the middle of the node block
@@ -80,6 +81,9 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
     def set_path(self):
         self.is_path = True
 
+    def set_debug_text(self, debug_text: str):
+        self.debug_text = debug_text
+
     def check_crash(self, pos: Tuple[int, int]):
         return self.block_rect.collidepoint(pos)
 
@@ -98,10 +102,10 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
             else:
                 self.block.fill(SEARCHED_COLOR)
         if self.get_distance() != sys.maxsize:
-            if type(self.distance_debug()) is list:
-                render_multiline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
-            if type(self.distance_debug()) == str:
-                render_inline_text(self.block, self.distance_debug(), 8, (0, 0, 0))
+            if type(self.debug_text) is list:
+                render_multiline_text(self.block, self.debug_text, 8, (0, 0, 0))
+            if type(self.debug_text) == str:
+                render_inline_text(self.block, self.debug_text, 8, (0, 0, 0))
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
 
@@ -110,16 +114,3 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
 
     def get_previous(self) -> PathFindingNode:
         return self.previous
-
-    def __deepcopy__(self, memodict={}):
-        copy_node = PathFindingNode(self.width,
-                                    self.height,
-                                    self.border_width,
-                                    self.x_pos,
-                                    self.y_pos,
-                                    self.x,
-                                    self.y)
-        copy_node.is_obstacle = self.is_obstacle
-        copy_node.is_path = self.is_path
-        copy_node.marked = self.marked
-        return copy_node

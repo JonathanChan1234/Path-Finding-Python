@@ -1,54 +1,24 @@
-import copy
-import sys
-from typing import List, Union
+from typing import List, Union, Tuple
 from algorithm.DijkstraNode import DijkstraNode
 from algorithm.Node import Node
+from algorithm.PathFindingState import PathFindingState
 from algorithm.PriorityHeapQueue import PriorityHeapQueue
 from ui.PathFindingNode import PathFindingNode
 
-ROW = 10
-COLUMN = 10
 VERTICAL_DISTANCE = 1
 HORIZONTAL_DISTANCE = 1
 DIAGONAL_DISTANCE = 1.4  # sqrt(2)
 DIJKSTRA = "Dijkstra"
-
-
-def debug_grid(grid: List[List[DijkstraNode]]):
-    for y in range(len(grid)):
-        for x in range(len(grid[y])):
-            print(grid[y][x])
-
-
-def debug_shortest_path(grid: List[List[DijkstraNode]], origin: DijkstraNode, destination: DijkstraNode) -> float:
-    # find the path first
-    path: List[DijkstraNode] = []
-    next_point = destination
-    while next_point.get_previous() is not None:
-        next_point = next_point.get_previous()
-        path.append(next_point)
-
-    for y in range(len(grid)):
-        for x in range(len(grid[y])):
-            if origin == grid[y][x]:
-                print("o", end='')
-            elif destination == grid[y][x]:
-                print("x", end='')
-            elif grid[y][x] in path:
-                print(' ', end='')
-            elif grid[y][x].is_obstacle():
-                print('$', end='')
-            else:
-                print('@', end='')
-        print('')
-    return destination.get_distance()
-
-
-def init_grid(grid: List[List[DijkstraNode]], row: int, column: int):
-    for y in range(row):
-        grid.append([])
-        for x in range(column):
-            grid[y].append(DijkstraNode(x, y))
+neighbors = [
+    {'distance': VERTICAL_DISTANCE, 'coordinate': [0, -1]},
+    {'distance': HORIZONTAL_DISTANCE, 'coordinate': [-1, 0]},
+    {'distance': HORIZONTAL_DISTANCE, 'coordinate': [1, 0]},
+    {'distance': VERTICAL_DISTANCE, 'coordinate': [0, 1]},
+    {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, -1]},
+    {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, -1]},
+    {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, 1]},
+    {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, 1]}
+]
 
 
 def update_node_distance(compared_node: DijkstraNode, current_node: DijkstraNode, weight: Union[int, float]):
@@ -75,27 +45,33 @@ def copy_grid(grid: List[List[Node]]) -> List[List[DijkstraNode]]:
     for row in range(len(grid)):
         new_grid_row = []
         for column in range(len(grid[row])):
-            new_grid_row.append(DijkstraNode(grid[row][column].x, grid[row][column].y))
+            node = DijkstraNode(grid[row][column].x, grid[row][column].y)
+            node.set_obstacle(grid[row][column].is_obstacle())
+            new_grid_row.append(node)
         new_grid.append(new_grid_row)
     return new_grid
 
 
-def copy_immediate_result(immediate_result: List[List[DijkstraNode]], grid: List[List[PathFindingNode]]):
-    animation = copy.deepcopy(grid)
-    for row in range(len(immediate_result)):
-        for column in range(len(immediate_result[row])):
-            if immediate_result[row][column].get_distance() != sys.maxsize:
-                animation[row][column].distance = immediate_result[row][column].get_distance()
-                if immediate_result[row][column].get_visited():
-                    animation[row][column].set_visited()
-                if immediate_result[row][column].get_previous():
-                    previous_node = immediate_result[row][column].get_previous()
-                    print(f'previous_node of node {column, row} is {previous_node}')
-                    animation[row][column].set_previous(animation[previous_node.y][previous_node.x])
-    return animation
+def save_immediate_result(dijkstra_grid: List[List[DijkstraNode]]):
+    result = []
+    for row in range(len(dijkstra_grid)):
+        temp_row = []
+        for column in range(len(dijkstra_grid[row])):
+            node = dijkstra_grid[row][column]
+            temp_row.append(PathFindingState(x=column,
+                                             y=row,
+                                             visited=node.visited,
+                                             distance=node.get_distance(),
+                                             previous=(node.previous.x, node.previous.y) if node.previous else None,
+                                             debug_text=node.debug_text()))
+        result.append(temp_row)
+    return result
 
 
-def dijkstra(grid: List[List[PathFindingNode]], origin: PathFindingNode, destination: PathFindingNode):
+def dijkstra(
+        grid: List[List[PathFindingNode]],
+        origin: PathFindingNode, destination: PathFindingNode) \
+        -> Tuple[bool, List[List[List[PathFindingState]]]]:
     dijkstra_grid = copy_grid(grid)
     dijkstra_grid_origin = dijkstra_grid[origin.y][origin.x]
     dijkstra_grid_destination = dijkstra_grid[destination.y][destination.x]
@@ -112,17 +88,7 @@ def dijkstra(grid: List[List[PathFindingNode]], origin: PathFindingNode, destina
             if not node.is_obstacle():
                 unvisited_list.insert(node)
 
-    neighbors = [
-        {'distance': VERTICAL_DISTANCE, 'coordinate': [0, -1]},
-        {'distance': HORIZONTAL_DISTANCE, 'coordinate': [-1, 0]},
-        {'distance': HORIZONTAL_DISTANCE, 'coordinate': [1, 0]},
-        {'distance': VERTICAL_DISTANCE, 'coordinate': [0, 1]},
-        {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, -1]},
-        {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, -1]},
-        {'distance': DIAGONAL_DISTANCE, 'coordinate': [-1, 1]},
-        {'distance': DIAGONAL_DISTANCE, 'coordinate': [1, 1]}
-    ]
-    animation: List[List[List[PathFindingNode]]] = []
+    animation: List[List[List[PathFindingState]]] = []
 
     while not unvisited_list.is_empty() and not dijkstra_grid_destination.get_visited():
         # Find the nearest node first (node with the smallest distance)
@@ -139,7 +105,8 @@ def dijkstra(grid: List[List[PathFindingNode]], origin: PathFindingNode, destina
                 update_node_distance(dijkstra_grid[neighbor_y][neighbor_x],
                                      current_node,
                                      neighbor['distance'])
-        animation.append(copy_immediate_result(dijkstra_grid, grid))
+
+        animation.append(save_immediate_result(dijkstra_grid))
 
     path_found = dijkstra_grid_destination.get_visited()
     return path_found, animation

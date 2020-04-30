@@ -1,11 +1,9 @@
-import sys
-
 import pygame
 from typing import List, Tuple
 
-from algorithm.AStarNode import AStarNode
-from algorithm.astar_grid import a_star
-from algorithm.dijkstra_grid import dijkstra
+from algorithm.PathFindingState import PathFindingState
+from algorithm.astar_grid import A_STAR, a_star
+from algorithm.dijkstra_grid import dijkstra, DIJKSTRA
 from ui.PathFindingNode import PathFindingNode
 
 NODE_WIDTH = 50
@@ -18,9 +16,6 @@ BORDER_COLOR = (0, 0, 0)
 
 
 class PathFindingGrid:
-    VERTICAL_DISTANCE = 1
-    HORIZONTAL_DISTANCE = 1
-    DIAGONAL_DISTANCE = 1.4  # sqrt(2)
     PATH_ANIMATION_ID = pygame.NUMEVENTS - 1
 
     def __init__(self,
@@ -32,18 +27,19 @@ class PathFindingGrid:
                  y_offset: int = Y_OFFSET,
                  width: int = NODE_WIDTH,
                  height: int = NODE_HEIGHT):
-        # Algorithm to be used
+        # Selected Path Finding Algorithm
         self.algorithm = algorithm
 
         # True when the player has made the first initial click, the hovered block will become obstacle
         self.select_obstacle = False
+
         # True when the player is currently in selecting the origin/destination
         self.select_marker = False
-        # The Path Finding is currently in progress
+
         self.disabled = False
         self.path_find_finished = False
         self.markers: List[PathFindingNode] = []
-        self.search_result: List[List[List[PathFindingNode]]] = []
+        self.search_result: List[List[List[PathFindingState]]] = []
 
         self.grid: List[List[PathFindingNode]] = []
         self.column = column
@@ -119,9 +115,15 @@ class PathFindingGrid:
     def start_path_find(self):
         if len(self.markers) != 2:
             raise Exception("Missing Origin/Destination Point")
-        self.set_disabled(True)
         origin, destination = self.markers[0], self.markers[1]
-        path_found, self.search_result = dijkstra(self.grid, origin, destination)
+        if self.algorithm == DIJKSTRA:
+            path_found, self.search_result = dijkstra(self.grid, origin, destination)
+        elif self.algorithm == A_STAR:
+            path_found, self.search_result = a_star(self.grid, origin, destination)
+        else:
+            print('This algorithm is not implemented yet')
+            return
+        self.set_disabled(True)
         pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 100)
 
     def update_grid(self):
@@ -129,15 +131,23 @@ class PathFindingGrid:
         if len(self.search_result) == 0:
             return
 
-        # draw the immediate result (animation)
+        # update the immediate result to the UI
         immediate_result = self.search_result.pop(0)
-        self.grid = immediate_result
+        for row in range(len(immediate_result)):
+            for column in range(len(immediate_result[row])):
+                node_state = immediate_result[row][column]
+                if node_state.visited:
+                    self.grid[row][column].set_visited()
+                if node_state.previous:
+                    previous_x, previous_y = node_state.previous
+                    self.grid[row][column].set_previous(self.grid[previous_y][previous_x])
+                self.grid[row][column].set_distance(node_state.distance)
+                self.grid[row][column].set_debug_text(node_state.debug_text)
 
         # draw the final path
         if len(self.search_result) == 0:
-            next_point = immediate_result[self.markers[1].y][self.markers[1].x]
+            next_point = self.markers[1]
             while next_point.get_previous():
-                print(next_point.x, next_point.y)
                 next_point.set_path()
                 next_point = next_point.get_previous()
             self.set_path_find_finished(True)
@@ -171,7 +181,7 @@ class PathFindingGrid:
         node.render(window_surface)
         if self.disabled:
             return
-        
+
         # Set the node that the player currently hover when these 3 conditions is fulfilled
         # 1. The player has made the first (initial click)
         # 2. The hover position is within a valid node

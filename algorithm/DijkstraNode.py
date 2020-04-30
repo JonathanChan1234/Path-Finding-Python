@@ -21,13 +21,12 @@ class DijkstraNode(Node):
     def get_previous(self) -> DijkstraNode:
         return self.previous
 
-    def distance_debug(self):
+    def debug_text(self) -> str:
         if self.distance == sys.maxsize:
-            return 'inf'
+            return ''
         else:
-            return f'f: {round(self.get_distance(), 2)}'
+            return f'f: {round(self.distance, 2)}'
 
     def __str__(self):
         return f'Position:({str(self.x)}, {str(self.y)})' \
-               f', Distance: {str(self.distance)}' \
-               f', {"Obstacle" if self.obstacle else ""}'
+               f', Distance: {str(self.distance)}'
