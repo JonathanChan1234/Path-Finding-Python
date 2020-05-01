@@ -10,7 +10,6 @@ from ui_utility.UIManager import UIManager
 from ui.PathFindingGrid import PathFindingGrid
 from ui_utility.UIButton import UIButton
 from ui_utility.UIText import UIText
-from worker.async_test import AsyncAlgorithmThread
 
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
@@ -38,13 +37,17 @@ class PathFindingGame:
         self.titleText = UIText(self.manager, 10, 10, (255, 255, 255), 'Path Finding Game')
 
         self.pointText = UIText(self.manager, 10, 30, (255, 255, 255), f'Distance: {self.points}')
-        self.clearAllObstacleButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 40, font_size=20,
+
+        self.mouse_debug_text = UIText(self.manager, 1000, 0, (0, 0, 0), '')
+        self.drawMazeButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 40, font_size=20,
+                                       text="Draw Maze")
+        self.clearAllObstacleButton = UIButton(self.manager, 1000, 100, (66, 245, 99), 150, 40, font_size=20,
                                                text="Clear Board")
-        self.setMarkerButton = UIButton(self.manager, 1000, 100, (235, 64, 52), 150, 40, font_size=20,
+        self.setMarkerButton = UIButton(self.manager, 1000, 150, (235, 64, 52), 150, 40, font_size=20,
                                         text="Obstacle")
-        self.startPathFindButton = UIButton(self.manager, 1000, 150, (235, 225, 52), 150, 40, font_size=20,
+        self.startPathFindButton = UIButton(self.manager, 1000, 200, (235, 225, 52), 150, 40, font_size=20,
                                             text="Path Finding")
-        self.resetGridButton = UIButton(self.manager, 1000, 200, (50, 72, 168), 150, 40, font_size=20, text="Reset All")
+        self.resetGridButton = UIButton(self.manager, 1000, 250, (50, 72, 168), 150, 40, font_size=20, text="Reset All")
 
         self.messageText = UIText(self.manager, 1000, 350, (201, 24, 4), font_size=20,
                                   text="", width=200)
@@ -64,7 +67,7 @@ class PathFindingGame:
                                             height=50,
                                             text_size=16,
                                             options=ALGORITHM_LIST)
-        self.mouse_debug_text = UIText(self.manager, 1000, 0, (0, 0, 0), '')
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {'grid': self.grid}))
 
     def refresh(self):
         self.mouse_debug_text.set_text(f'{str(pygame.mouse.get_pos()[0])}, {str(pygame.mouse.get_pos()[1])}')
@@ -94,10 +97,12 @@ class PathFindingGame:
 
         # disable the clear obstacle and set maker button when the animation started
         if self.grid.is_disabled():
+            self.drawMazeButton.set_disabled()
             self.clearAllObstacleButton.set_disabled()
             self.setMarkerButton.set_disabled()
             self.startPathFindButton.set_disabled()
         else:
+            self.drawMazeButton.set_enabled()
             self.clearAllObstacleButton.set_enabled()
             self.setMarkerButton.set_enabled()
             self.startPathFindButton.set_enabled()
@@ -119,10 +124,12 @@ class PathFindingGame:
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == UIManager.BUTTON_EVENT_ID:
+                if event.component_id == self.drawMazeButton.component_id:
+                    self.grid.draw_maze()
                 if event.component_id == self.clearAllObstacleButton.component_id:
                     self.grid.clear_all_obstacle()
                 if event.component_id == self.setMarkerButton.component_id:
-                    self.switch_mode()
+                    self.grid.switch_mode()
                 if event.component_id == self.startPathFindButton.component_id:
                     if not self.grid.is_marker_set():
                         self.messageText.set_text("Please select two points")
@@ -134,17 +141,17 @@ class PathFindingGame:
                     if event.event == UIDialog.CLOSE_BUTTON_CLICKED:
                         self.dialog.dismiss()
                 if event.component_id == self.dropdown_menu.component_id:
-                    # change the algorithm according to the value
                     self.grid.set_algorithm(event.value)
-            if event.type == AsyncAlgorithmThread.EVENT_ID:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F3:
+                self.grid.set_debug_mode(not self.grid.debug_mode)
+            if event.type == pygame.USEREVENT:
                 print(event)
-
-    def switch_mode(self):
-        self.grid.switch_mode()
+                print(event.grid.column)
+                print(event.grid.row)
 
 
 if __name__ == '__main__':
-    grid = PathFindingGrid(A_STAR, 15, 13)
+    grid = PathFindingGrid(A_STAR, 75, 65, height=10, width=10, border_width=1)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BACKGROUND_COLOR, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()

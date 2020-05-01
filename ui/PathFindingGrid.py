@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 from algorithm.PathFindingState import PathFindingState
 from algorithm.astar_grid import A_STAR, a_star
+from algorithm.dfs_maze import dfs_maze_generation
 from algorithm.dijkstra_grid import dijkstra, DIJKSTRA
 from ui.PathFindingNode import PathFindingNode
 
@@ -26,7 +27,8 @@ class PathFindingGrid:
                  x_offset: int = X_OFFSET,
                  y_offset: int = Y_OFFSET,
                  width: int = NODE_WIDTH,
-                 height: int = NODE_HEIGHT):
+                 height: int = NODE_HEIGHT,
+                 border_width: int = BORDER):
         # Selected Path Finding Algorithm
         self.algorithm = algorithm
 
@@ -35,6 +37,9 @@ class PathFindingGrid:
 
         # True when the player is currently in selecting the origin/destination
         self.select_marker = False
+
+        # Debug mode
+        self.debug_mode = False
 
         self.disabled = False
         self.path_find_finished = False
@@ -49,6 +54,7 @@ class PathFindingGrid:
         self.y_offset = y_offset
         self.width = width
         self.height = height
+        self.border_width = border_width
         self.init_grid()
 
     def init_grid(self):
@@ -59,8 +65,8 @@ class PathFindingGrid:
                 node = PathFindingNode(self.width,
                                        self.height,
                                        BORDER,
-                                       column * self.width + self.x_offset + BORDER,
-                                       row * self.height + self.y_offset + BORDER,
+                                       column * self.width + self.x_offset + self.border_width,
+                                       row * self.height + self.y_offset + self.border_width,
                                        column,
                                        row)
                 grid_row.append(node)
@@ -112,6 +118,17 @@ class PathFindingGrid:
     def is_path_find_finished(self):
         return self.path_find_finished
 
+    def set_debug_mode(self, debug_mode):
+        self.debug_mode = debug_mode
+        self.grid_iterator(lambda node: node.set_debug_mode(debug_mode))
+
+    def draw_maze(self):
+        self.reset_grid()
+        obstacle_list = dfs_maze_generation(self)
+        for obstacle in obstacle_list:
+            obstacle_x, obstacle_y = obstacle
+            self.grid[obstacle_y][obstacle_x].set_obstacle()
+
     def start_path_find(self):
         if len(self.markers) != 2:
             raise Exception("Missing Origin/Destination Point")
@@ -123,8 +140,9 @@ class PathFindingGrid:
         else:
             print('This algorithm is not implemented yet')
             return
+        print(len(self.search_result))
         self.set_disabled(True)
-        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 100)
+        pygame.time.set_timer(PathFindingGrid.PATH_ANIMATION_ID, 10)
 
     def update_grid(self):
         # ignore the event counter when the animation is finished

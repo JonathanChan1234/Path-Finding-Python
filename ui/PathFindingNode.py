@@ -61,6 +61,7 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
         self.marked = False
         self.is_path = False
         self.debug_text: Union[str, List[str]] = ''
+        self.debug_mode = False
 
         # marker
         # set marker to the middle of the node block
@@ -80,6 +81,9 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
 
     def set_path(self):
         self.is_path = True
+
+    def set_debug_mode(self, debug_mode):
+        self.debug_mode = debug_mode
 
     def set_debug_text(self, debug_text: str):
         self.debug_text = debug_text
@@ -101,11 +105,12 @@ class PathFindingNode(pygame.sprite.Sprite, Node):
                 self.block.fill(UNVISITED_COLOR)
             else:
                 self.block.fill(SEARCHED_COLOR)
-        if self.get_distance() != sys.maxsize:
-            if type(self.debug_text) is list:
-                render_multiline_text(self.block, self.debug_text, 8, (0, 0, 0))
-            if type(self.debug_text) == str:
-                render_inline_text(self.block, self.debug_text, 8, (0, 0, 0))
+        if self.debug_mode:
+            if self.get_distance() != sys.maxsize:
+                if type(self.debug_text) is list:
+                    render_multiline_text(self.block, self.debug_text, 8, (0, 0, 0))
+                if type(self.debug_text) == str:
+                    render_inline_text(self.block, self.debug_text, 8, (0, 0, 0))
         window_surface.blit(self.border, self.border_rect)
         window_surface.blit(self.block, self.block_rect)
 

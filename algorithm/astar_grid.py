@@ -39,9 +39,6 @@ def update_node_distance(compared_node: AStarNode, current_node: AStarNode, dest
     new_distance = new_g + new_h
     if compared_node.get_distance() >= new_distance:
         compared_node.set_previous(current_node)
-        print(current_node)
-        print(new_g)
-        print(new_h)
         compared_node.set_g(new_g)
         compared_node.set_h(new_h)
 
