@@ -36,8 +36,6 @@ class PathFindingGame:
         self.manager = UIManager()
         self.titleText = UIText(self.manager, 10, 10, (255, 255, 255), 'Path Finding Game')
 
-        self.pointText = UIText(self.manager, 10, 30, (255, 255, 255), f'Distance: {self.points}')
-
         self.mouse_debug_text = UIText(self.manager, 1000, 0, (0, 0, 0), '')
         self.drawMazeButton = UIButton(self.manager, 1000, 50, (66, 245, 99), 150, 40, font_size=20,
                                        text="Draw Maze")
@@ -144,14 +142,10 @@ class PathFindingGame:
                     self.grid.set_algorithm(event.value)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_F3:
                 self.grid.set_debug_mode(not self.grid.debug_mode)
-            if event.type == pygame.USEREVENT:
-                print(event)
-                print(event.grid.column)
-                print(event.grid.row)
 
 
 if __name__ == '__main__':
-    grid = PathFindingGrid(A_STAR, 75, 65, height=10, width=10, border_width=1)
+    grid = PathFindingGrid(A_STAR, 41, 41, height=15, width=15, border_width=3)
     path_finding_game = PathFindingGame(WINDOW_WIDTH, WINDOW_HEIGHT, FPS, BACKGROUND_COLOR, grid)
     while path_finding_game.running:
         path_finding_game.event_handle()
