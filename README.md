@@ -1,5 +1,6 @@
 # Path Finding Algorithm Visualisation
 Implement and Visualize A* and Dijkstra Algorithm in Python3 using Pygame library
+
 Generate random maze using Depth-First Search
 
 ### Demo
